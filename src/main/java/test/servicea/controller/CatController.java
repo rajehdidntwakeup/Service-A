@@ -8,9 +8,9 @@ import test.servicea.repository.CatRepository;
 
 import java.util.List;
 
-@CrossOrigin(origins = "http://localhost:8081")
 @RestController
 @RequestMapping("/cats")
+@CrossOrigin(origins = "http://localhost:8081", allowedHeaders = "*")
 public class CatController {
 
     CatRepository catRepository;
