@@ -2,6 +2,7 @@ name: Feature Request
 description: Suggest a new feature with clear acceptance criteria
 title: "[Feature]: "
 labels: [enhancement]
+project: "Service A"
 body:
   - type: input
     id: title
