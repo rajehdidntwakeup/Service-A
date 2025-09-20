@@ -1,0 +1,14 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 📚 Documentation
+    about: Check our documentation before creating a new issue.
+issue_templates:
+  - name: Feature Request
+    description: Suggest a new feature with clear acceptance criteria
+    file: feature_request.yml
+  - name: Setup Issue
+    description: Track setup-related tasks with clear acceptance criteria
+    file: setup_issue.yml
+  - name: Bug Report
+    description: Report a bug with clear acceptance criteria
+    file: bug_issue.yml
