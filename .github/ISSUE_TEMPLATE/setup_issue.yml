@@ -25,7 +25,7 @@ body:
     id: acceptance_criteria
     attributes:
       label: Acceptance Criteria
-      description: Provide a **numbered list** of conditions that must be met for setup to be complete.
+      description: Provide a **checklist** of conditions that must be met for setup to be complete.
       placeholder: |
         - [ ] CI/CD pipeline runs on every push
         - [ ] Tests are executed automatically
