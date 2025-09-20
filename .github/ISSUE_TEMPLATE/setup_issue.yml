@@ -2,7 +2,6 @@ name: Setup Issue
 description: Track setup-related tasks with clear acceptance criteria
 title: "[Setup]: "
 labels: [setup]
-project: "Service A"
 body:
   - type: input
     id: title

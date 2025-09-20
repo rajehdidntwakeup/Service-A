@@ -2,7 +2,6 @@ name: Bug Report
 description: Report a bug with clear acceptance criteria for when it’s resolved
 title: "[BUG]: "
 labels: [bug]
-project: "Service A"
 body:
   - type: input
     id: title
