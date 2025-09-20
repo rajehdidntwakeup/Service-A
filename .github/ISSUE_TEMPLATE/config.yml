@@ -3,12 +3,14 @@ contact_links:
   - name: Documentation
     about: Check our documentation before creating a new issue.
 issue_templates:
-  - name: Feature Request
+  - name: Feature Issue
     description: Suggest a new feature with clear acceptance criteria
-    file: feature_request.yml
+    file: feature_issue.yml
   - name: Setup Issue
     description: Track setup-related tasks with clear acceptance criteria
     file: setup_issue.yml
-  - name: Bug Report
+  - name: Bug Issue
     description: Report a bug with clear acceptance criteria
     file: bug_issue.yml
+  - name: Documentation Issue
+    description: Add or update documentation

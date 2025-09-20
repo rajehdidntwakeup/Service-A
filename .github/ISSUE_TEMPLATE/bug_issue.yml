@@ -1,4 +1,4 @@
-name: Bug Report
+name: Bug Issue
 description: Report a bug with clear acceptance criteria for when it’s resolved
 title: "[BUG]: "
 labels: [bug]
