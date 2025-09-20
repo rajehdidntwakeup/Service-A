@@ -27,8 +27,8 @@ body:
       label: Acceptance Criteria
       description: Provide a **numbered list** of conditions that must be met for setup to be complete.
       placeholder: |
-        1. CI/CD pipeline runs on every push
-        2. Tests are executed automatically
-        3. Deployment succeeds without manual steps
+        - [ ] CI/CD pipeline runs on every push
+        - [ ] Tests are executed automatically
+        - [ ] Deployment succeeds without manual steps
     validations:
       required: true

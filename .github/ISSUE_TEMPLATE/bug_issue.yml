@@ -27,8 +27,8 @@ body:
       label: Acceptance Criteria
       description: Provide a **numbered list** of conditions that define when the bug is fixed.
       placeholder: |
-        1. Login button redirects correctly to the dashboard
-        2. User session is created successfully
-        3. No console errors appear during login
+        - [ ] Login button redirects correctly to the dashboard
+        - [ ] User session is created successfully
+        - [ ] No console errors appear during login
     validations:
       required: true

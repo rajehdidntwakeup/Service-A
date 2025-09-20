@@ -27,8 +27,8 @@ body:
       label: Acceptance Criteria
       description: Provide a **numbered list** of conditions that must be met.
       placeholder: |
-        1. User can enable/disable dark mode
-        2. Setting is persisted after reload
-        3. Works across all pages
+        - [ ] User can enable/disable dark mode
+        - [ ] Setting is persisted after reload
+        - [ ] Works across all pages
     validations:
       required: true
