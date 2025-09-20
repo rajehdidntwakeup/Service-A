@@ -1,0 +1,34 @@
+name: Setup Issue
+description: Track setup-related tasks with clear acceptance criteria
+title: "[Setup]: "
+labels: [setup]
+body:
+  - type: input
+    id: title
+    attributes:
+      label: Setup Task Title
+      description: Short title for this setup-related issue
+      placeholder: e.g. Configure CI/CD pipeline
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: A clear and concise description of the setup task.
+      placeholder: Explain the setup requirement in detail...
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance_criteria
+    attributes:
+      label: Acceptance Criteria
+      description: Provide a **numbered list** of conditions that must be met for setup to be complete.
+      placeholder: |
+        1. CI/CD pipeline runs on every push
+        2. Tests are executed automatically
+        3. Deployment succeeds without manual steps
+    validations:
+      required: true
