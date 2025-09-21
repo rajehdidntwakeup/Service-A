@@ -1,7 +1,4 @@
 blank_issues_enabled: false
-contact_links:
-  - name: Documentation
-    about: Check our documentation before creating a new issue.
 issue_templates:
   - name: Feature Issue
     description: Suggest a new feature with clear acceptance criteria
