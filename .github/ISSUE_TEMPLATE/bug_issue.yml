@@ -8,7 +8,7 @@ body:
     attributes:
       label: Bug Title
       description: Short title describing the bug
-      placeholder: e.g. Login button does not redirect
+      placeholder: e.g. GET endpoint returns 404
     validations:
       required: true
 
@@ -27,8 +27,8 @@ body:
       label: Acceptance Criteria
       description: Provide a **checklist** of conditions that define when the bug is fixed.
       placeholder: |
-        - [ ] Login button redirects correctly to the dashboard
-        - [ ] User session is created successfully
-        - [ ] No console errors appear during login
+        - [ ] GET request to endpoint returns 200 OK status code
+        - [ ] Response includes expected data in the correct format
+        - [ ] Error logs show no exceptions or failures
     validations:
       required: true

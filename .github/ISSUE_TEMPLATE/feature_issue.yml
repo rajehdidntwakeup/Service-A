@@ -8,7 +8,7 @@ body:
     attributes:
       label: Feature Title
       description: Short title for this feature
-      placeholder: e.g. Add dark mode toggle
+      placeholder: e.g. Create REST Controller
     validations:
       required: true
 
@@ -27,8 +27,15 @@ body:
       label: Acceptance Criteria
       description: Provide a **checklist** of conditions that must be met.
       placeholder: |
-        - [ ] User can enable/disable dark mode
-        - [ ] Setting is persisted after reload
-        - [ ] Works across all pages
+        - [ ] REST Controller is created with proper request mapping
+        - [ ] Implements GET endpoint to retrieve all resources
+        - [ ] Implements GET endpoint to retrieve resource by ID
+        - [ ] Implements POST endpoint to create new resource
+        - [ ] Implements PUT endpoint to update existing resource
+        - [ ] Implements DELETE endpoint to remove resource
+        - [ ] Returns appropriate HTTP status codes (200, 201, 404, etc.)
+        - [ ] Includes proper request/response validation
+        - [ ] Has comprehensive error handling
+        - [ ] Has unit tests
     validations:
       required: true

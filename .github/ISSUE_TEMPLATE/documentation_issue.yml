@@ -9,7 +9,7 @@ body:
     attributes:
       label: Documentation Title
       description: Short title for this documentation task
-      placeholder: e.g. Update installation guide
+      placeholder: e.g. Update README with latest steps
     validations:
       required: true
 
@@ -28,8 +28,10 @@ body:
       label: Acceptance Criteria
       description: Provide a **checklist** of conditions that must be met.
       placeholder: |
-        - [ ] Installation guide updated with latest steps
-        - [ ] Screenshots reflect current UI
-        - [ ] README links updated to point to new docs
+        - [ ] README updated with Java 24 runtime requirements
+        - [ ] Security configuration section added with CORS details
+        - [ ] H2 database setup instructions updated
+        - [ ] REST endpoints documentation refreshed with latest examples
+        - [ ] Project structure and dependencies list updated
     validations:
       required: true
