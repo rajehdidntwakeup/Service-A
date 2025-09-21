@@ -8,7 +8,7 @@ body:
     attributes:
       label: Setup Task Title
       description: Short title for this setup-related issue
-      placeholder: e.g. Configure CI/CD pipeline
+      placeholder: e.g. Setup a java maven project..
     validations:
       required: true
 
@@ -27,8 +27,9 @@ body:
       label: Acceptance Criteria
       description: Provide a **checklist** of conditions that must be met for setup to be complete.
       placeholder: |
-        - [ ] CI/CD pipeline runs on every push
-        - [ ] Tests are executed automatically
-        - [ ] Deployment succeeds without manual steps
+        - [ ] Create a Spring Boot project
+        - [ ] Add Java 24
+        - [ ] Add Maven
+        - [ ] Add fundamental dependencies
     validations:
       required: true
