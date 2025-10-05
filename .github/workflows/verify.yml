@@ -97,7 +97,7 @@ jobs:
       matrix:
         java-version: [ "24" ]
     steps:
-      - uses: step-security/harden-runner@f4a75cfd619ee5ce8d5b864b0d183aff3c69b55a # v2.13.1 (optional: for pipeline security, as in original)
+      - uses: step-security/harden-runner@f4a75cfd619ee5ce8d5b864b0d183aff3c69b55a # v2.13.1
         with:
           egress-policy: audit
 
@@ -108,22 +108,31 @@ jobs:
       - uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # v5.0.0
         with:
           java-version: "${{ matrix.java-version }}"
-          distribution: "temurin"  # Or "corretto"; Temurin is widely used for recent Java versions
+          distribution: "corretto"
 
       - name: Generate SBOM with CycloneDX
-        run: mvn cyclonedx:makeAggregateBom  # Use 'cyclonedx:makeBom' for single-module; outputs to target/bom.json (configurable)
+        run: mvn cyclonedx:makeAggregateBom
 
-      - uses: anchore/scan-action@f6601287cdb1efc985d6b765bbf99cb4c0ac29d8 # v7 (optional: for vulnerability scanning)
+      - name: Debug SBOM Contents
+        run: cat target/bom.json || echo "SBOM file missing or empty"
+
+      - name: Upload SBOM for Debugging
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: sbom
+          path: target/bom.*
+
+      - uses: anchore/scan-action@f6601287cdb1efc985d6b765bbf99cb4c0ac29d8 # v7
         id: anchore
         with:
-          sbom: target/bom.json  # Adjust if using XML or custom output
-          fail-build: false  # Informational; set to true to fail on issues
+          sbom: target/bom.json
+          fail-build: false
           severity-cutoff: medium
 
-      - uses: github/codeql-action/upload-sarif@64d10c13136e1c5bce3e5fbde8d4906eeaafc885 # v3 (optional: upload scan results)
+      - uses: github/codeql-action/upload-sarif@64d10c13136e1c5bce3e5fbde8d4906eeaafc885 # v3
         with:
           sarif_file: ${{ steps.anchore.outputs.sarif }}
-        continue-on-error: true  # Handles potential invalid SARIF
+        continue-on-error: true
 
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
