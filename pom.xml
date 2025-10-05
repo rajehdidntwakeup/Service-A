@@ -111,6 +111,31 @@
                     </excludes>
                 </configuration>
             </plugin>
+
+            <!-- PiTest Mutation Testing Plugin -->
+            <plugin>
+                <groupId>org.pitest</groupId>
+                <artifactId>pitest-maven</artifactId>
+                <version>1.15.8</version>
+                <configuration>
+                    <!-- Change to match your actual package name -->
+                    <targetClasses>
+                        <param>test.*</param>
+                    </targetClasses>
+                    <targetTests>
+                        <param>test.*</param>
+                    </targetTests>
+                    <mutators>
+                        <mutator>STRONGER</mutator>
+                    </mutators>
+                    <threads>4</threads>
+                    <outputFormats>
+                        <param>HTML</param>
+                        <param>XML</param>
+                    </outputFormats>
+                    <timestampedReports>false</timestampedReports>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 </project>
