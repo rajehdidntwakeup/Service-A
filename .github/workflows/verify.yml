@@ -23,6 +23,10 @@ jobs:
   checkstyle:
     runs-on: ubuntu-latest
     name: Checkstyle
+    strategy:
+      max-parallel: 4
+      matrix:
+        java-version: [ "24" ]
 
     steps:
       - uses: step-security/harden-runner@f4a75cfd619ee5ce8d5b864b0d183aff3c69b55a
@@ -35,7 +39,7 @@ jobs:
 
       - uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165
         with:
-          java-version: "24"
+          java-version: "${{ matrix.java-version }}"
           distribution: "corretto"
 
       - name: Cache Maven packages
@@ -52,6 +56,10 @@ jobs:
   pmd:
     runs-on: ubuntu-latest
     name: PMD
+    strategy:
+      max-parallel: 4
+      matrix:
+        java-version: [ "24" ]
 
     steps:
       - uses: step-security/harden-runner@f4a75cfd619ee5ce8d5b864b0d183aff3c69b55a # v2.13.1
@@ -64,7 +72,7 @@ jobs:
 
       - uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # v5.0.0
         with:
-          java-version: "24"
+          java-version: "${{ matrix.java-version }}"
           distribution: "corretto"
 
       - name: Cache Maven packages
@@ -125,6 +133,12 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
+    name: Unit Tests
+    strategy:
+      max-parallel: 4
+      matrix:
+        java-version: [ "24" ]
+
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
@@ -133,7 +147,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: corretto
-          java-version: 24
+          java-version: "${{ matrix.java-version }}"
           cache: maven
 
       - name: Run Tests
