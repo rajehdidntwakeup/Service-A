@@ -118,12 +118,11 @@
                 <artifactId>pitest-maven</artifactId>
                 <version>1.15.8</version>
                 <configuration>
-                    <!-- Change to match your actual package name -->
                     <targetClasses>
-                        <param>test.*</param>
+                        <param>test.servicea.*</param>
                     </targetClasses>
                     <targetTests>
-                        <param>test.*</param>
+                        <param>test.servicea.*</param>
                     </targetTests>
                     <mutators>
                         <mutator>STRONGER</mutator>
