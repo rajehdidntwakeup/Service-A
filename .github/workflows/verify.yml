@@ -99,6 +99,7 @@ jobs:
     needs:
       - test
       - checkstyle
+      - pmd
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
