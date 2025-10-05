@@ -78,7 +78,6 @@
                 <version>3.3.0</version>
                 <configuration>
                     <configLocation>checkstyle/checkstyle.xml</configLocation>
-                    <configLocation>checkstyle/checkstyle-suppressions.xml</configLocation>
                     <failOnViolation>true</failOnViolation>
                     <consoleOutput>true</consoleOutput>
                     <encoding>UTF-8</encoding>
