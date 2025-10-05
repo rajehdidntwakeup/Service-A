@@ -16,6 +16,14 @@ import java.util.List;
 @Configuration
 public class SecurityConfig {
 
+
+    /**
+     * Configures the security filter chain for HTTP requests.
+     *
+     * @param http the {@link HttpSecurity} object used to configure security settings
+     * @return a {@link SecurityFilterChain} object that represents the constructed filter chain
+     * @throws Exception if an error occurs while building the filter chain
+     */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -27,13 +35,22 @@ public class SecurityConfig {
                 );
 
         // For H2 console frames if you use it
-        http.headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin));
+        http.headers(headers ->
+                headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin));
 
         return http.build();
     }
 
 
 
+    /**
+     * Configures the Cross-Origin Resource Sharing (CORS) settings for the application.
+     * This method defines the allowed origins, allowed methods, allowed headers, exposed headers,
+     * credentials policy, and maximum age for preflight requests. The configuration is applied
+     * to all endpoints within the application.
+     *
+     * @return a {@link CorsConfigurationSource} object containing the CORS configuration settings
+     */
     // CORS configuration
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {

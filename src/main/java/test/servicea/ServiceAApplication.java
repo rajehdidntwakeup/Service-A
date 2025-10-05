@@ -13,6 +13,13 @@ public class ServiceAApplication {
         SpringApplication.run(ServiceAApplication.class, args);
     }
 
+    /**
+     * Configures CORS (Cross-Origin Resource Sharing) settings for the application.
+     * This method defines the allowed origins, methods, headers, and other CORS
+     * preferences to enable secure communication from specified sources.
+     *
+     * @return a WebMvcConfigurer object that configures the CORS mappings for the application
+     */
     @Bean
     public WebMvcConfigurer corsConfigurer() {
         return new WebMvcConfigurer() {
@@ -20,7 +27,7 @@ public class ServiceAApplication {
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
                         .allowedOrigins("http://localhost:8081")
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
+                        .allowedMethods("GET", "POST", "PUT")
                         .allowedHeaders("*")
                         .exposedHeaders("Authorization", "Link")
                         .allowCredentials(true)
