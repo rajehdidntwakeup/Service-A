@@ -134,12 +134,6 @@ jobs:
           sarif_file: ${{ steps.anchore.outputs.sarif }}
         continue-on-error: true
 
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        with:
-          name: sbom
-          path: target/bom.*
-
-
   test:
     runs-on: ubuntu-latest
     name: Unit Tests
