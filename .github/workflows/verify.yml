@@ -131,8 +131,8 @@ jobs:
       - name: Convert SpotBugs XML to SARIF
         run: |
           curl -L -o spotbugs.jar https://repo1.maven.org/maven2/com/github/spotbugs/spotbugs/4.9.6/spotbugs-4.9.6.jar
-          java -cp spotbugs.jar com.github.spotbugs.sparks.SpotBugsSarif target/spotbugs/spotbugs.xml spotbugs.sarif
-        continue-on-error: true
+          curl -L -o spotbugs-sarif.jar https://repo1.maven.org/maven2/com/github/spotbugs/spotbugs-sarif-plugin/0.2.14/spotbugs-sarif-plugin-0.2.14.jar
+          java -cp "spotbugs.jar:spotbugs-sarif.jar" com.github.spotbugs.sarif.SarifOutput target/spotbugs/spotbugs.xml spotbugs.sarif
       - name: Check SARIF File
         run: ls -l spotbugs.sarif || echo "SARIF file missing"
       - name: Upload SARIF to GitHub
