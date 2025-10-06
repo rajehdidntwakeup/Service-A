@@ -119,20 +119,11 @@ jobs:
         run: |
           mvn clean compile || { echo "Compilation failed"; exit 1; }
           mvn spotbugs:spotbugs || { echo "SpotBugs failed"; exit 1; }
-      - name: Check SpotBugs Report  # Optional: Keep if you want to inspect XML
-        run: |
-          ls -l target/spotbugs/ || echo "SpotBugs directory missing"
-          cat target/spotbugs/spotbugs.xml || echo "SpotBugs XML report missing or empty"
-      - name: Upload SpotBugs Report  # Optional: For XML artifact
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        with:
-          name: spotbugs-report
-          path: target/spotbugs/spotbugs.xml
       - name: Upload SARIF to GitHub
         if: always()
         uses: github/codeql-action/upload-sarif@64d10c13136e1c5bce3e5fbde8d4906eeaafc885 # v3
         with:
-          sarif_file: target/spotbugs/spotbugs.sarif  # Adjust if you used a different filename/dir
+          sarif_file: target/spotbugs/spotbugs.sarif  # Adjust if using a different filename/dir (e.g., target/spotbugsSarif.json)
         continue-on-error: true
 
   test:
