@@ -104,21 +104,32 @@ jobs:
         with:
           java-version: "${{ matrix.java-version }}"
           distribution: "temurin"
-      - name: Run SpotBugs
-        run: mvn spotbugs:spotbugs || { echo "SpotBugs failed"; exit 1; }
+      - name: Cache Maven packages
+        uses: actions/cache@13aacd865c20d9d4d6947b1401cce67e7e22a5bf # v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-maven-
+      - name: Compile and Run SpotBugs
+        run: |
+          mvn clean compile || { echo "Compilation failed"; exit 1; }
+          mvn spotbugs:spotbugs || { echo "SpotBugs failed"; exit 1; }
       - name: Check SpotBugs Report
-        run: ls -l target/spotbugs/ && cat target/spotbugs/spotbugs.xml || echo "SpotBugs report missing"
+        run: |
+          ls -l target/spotbugs/ || echo "SpotBugs directory missing"
+          cat target/spotbugs/spotbugs.xml || echo "SpotBugs XML report missing or empty"
       - name: Upload SpotBugs Report
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: spotbugs-report
           path: target/spotbugs/spotbugs.xml
-      - name: Convert SpotBugs XML to SARIF (Optional)
-        if: always()  # Run even if SpotBugs fails
+      - name: Convert SpotBugs XML to SARIF
         run: |
-          curl -L -o spotbugs2sarif.jar https://github.com/spotbugs/spotbugs/releases/download/4.8.7/spotbugs-4.8.7.jar
-          java -cp spotbugs2sarif.jar com.h3xstream.findsecbugs.sparks.SpotBugsToSarif target/spotbugs/spotbugs.xml spotbugs.sarif
+          curl -L -o spotbugs.jar https://repo1.maven.org/maven2/com/github/spotbugs/spotbugs/4.9.6/spotbugs-4.9.6.jar
+          java -cp spotbugs.jar com.github.spotbugs.sparks.SpotBugsSarif target/spotbugs/spotbugs.xml spotbugs.sarif
         continue-on-error: true
+      - name: Check SARIF File
+        run: ls -l spotbugs.sarif || echo "SARIF file missing"
       - name: Upload SARIF to GitHub
         if: always()
         uses: github/codeql-action/upload-sarif@64d10c13136e1c5bce3e5fbde8d4906eeaafc885 # v3
