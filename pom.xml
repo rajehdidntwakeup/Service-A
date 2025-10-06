@@ -113,20 +113,32 @@
             </plugin>
 
             <plugin>
-                <groupId>org.cyclonedx</groupId>
-                <artifactId>cyclonedx-maven-plugin</artifactId>
-                <version>2.9.1</version>
-                <configuration>
-                    <outputFormat>xml</outputFormat>
-                </configuration>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
+                <version>4.9.6.0</version> <!-- Latest stable as of October 2025 -->
+                <dependencies>
+                    <!-- Optional: Add FindSecBugs for enhanced security rules (e.g., injection vulnerabilities) -->
+                    <dependency>
+                        <groupId>com.h3xstream.findsecbugs</groupId>
+                        <artifactId>findsecbugs-plugin</artifactId>
+                        <version>1.14.0</version> <!-- Latest compatible -->
+                    </dependency>
+                </dependencies>
                 <executions>
                     <execution>
-                        <phase>package</phase>
+                        <phase>verify</phase>
                         <goals>
-                            <goal>makeAggregateBom</goal>
+                            <goal>spotbugs</goal>
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <effort>Max</effort> <!-- Thorough analysis; use 'Min' for faster CI runs -->
+                    <threshold>Low</threshold> <!-- Low for more detections; adjust to 'Medium' if noisy -->
+                    <xmlOutput>true</xmlOutput> <!-- For CI/CD parsing -->
+                    <outputDirectory>target/spotbugs</outputDirectory>
+                    <failOnError>false</failOnError> <!-- Set to true to fail builds on issues -->
+                </configuration>
             </plugin>
         </plugins>
     </build>

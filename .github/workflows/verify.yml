@@ -86,12 +86,9 @@ jobs:
       - name: Run PMD Analysis
         run: mvn --batch-mode clean pmd:check
 
-  cyclonedx:
+  spotbugs:
     runs-on: ubuntu-latest
-    name: SBOM
-    permissions:
-      contents: read
-      security-events: write
+    name: SpotBugs
     strategy:
       max-parallel: 4
       matrix:
@@ -100,38 +97,33 @@ jobs:
       - uses: step-security/harden-runner@f4a75cfd619ee5ce8d5b864b0d183aff3c69b55a # v2.13.1
         with:
           egress-policy: audit
-
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           fetch-depth: 0
-
       - uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # v5.0.0
         with:
           java-version: "${{ matrix.java-version }}"
-          distribution: "corretto"
-
-      - name: Generate SBOM with CycloneDX
-        run: mvn cyclonedx:makeAggregateBom
-
-      - name: Debug SBOM Contents
-        run: cat target/bom.json || echo "SBOM file missing or empty"
-
-      - name: Upload SBOM for Debugging
+          distribution: "temurin"
+      - name: Run SpotBugs
+        run: mvn spotbugs:spotbugs || { echo "SpotBugs failed"; exit 1; }
+      - name: Check SpotBugs Report
+        run: ls -l target/spotbugs/ && cat target/spotbugs/spotbugs.xml || echo "SpotBugs report missing"
+      - name: Upload SpotBugs Report
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: sbom
-          path: target/bom.*
-
-      - uses: anchore/scan-action@f6601287cdb1efc985d6b765bbf99cb4c0ac29d8 # v7
-        id: anchore
+          name: spotbugs-report
+          path: target/spotbugs/spotbugs.xml
+      - name: Convert SpotBugs XML to SARIF (Optional)
+        if: always()  # Run even if SpotBugs fails
+        run: |
+          curl -L -o spotbugs2sarif.jar https://github.com/spotbugs/spotbugs/releases/download/4.8.7/spotbugs-4.8.7.jar
+          java -cp spotbugs2sarif.jar com.h3xstream.findsecbugs.sparks.SpotBugsToSarif target/spotbugs/spotbugs.xml spotbugs.sarif
+        continue-on-error: true
+      - name: Upload SARIF to GitHub
+        if: always()
+        uses: github/codeql-action/upload-sarif@64d10c13136e1c5bce3e5fbde8d4906eeaafc885 # v3
         with:
-          sbom: target/bom.json
-          fail-build: false
-          severity-cutoff: medium
-
-      - uses: github/codeql-action/upload-sarif@64d10c13136e1c5bce3e5fbde8d4906eeaafc885 # v3
-        with:
-          sarif_file: ${{ steps.anchore.outputs.sarif }}
+          sarif_file: spotbugs.sarif
         continue-on-error: true
 
   test:
@@ -162,7 +154,7 @@ jobs:
       - test
       - checkstyle
       - pmd
-      - cyclonedx
+      - spotbugs
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
