@@ -4,7 +4,11 @@ on:
   push:
   pull_request:
     branches:
-      - master
+      - main
+
+permissions:
+  contents: read
+  security-events: write
 
 jobs:
   conform:
@@ -105,7 +109,8 @@ jobs:
           java-version: "${{ matrix.java-version }}"
           distribution: "temurin"
       - name: Cache Maven packages
-        uses: actions/cache@13aacd865c20d9d4d6947b1401cce67e7e22a5bf # v4
+        uses: actions/cache@v4  # Updated to latest stable tag
+        id: maven-cache  # Optional: Add ID for cache-hit checks
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
