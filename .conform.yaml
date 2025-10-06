@@ -16,6 +16,8 @@ policies:
       maximumOfOneCommit: false
       conventional:
         types:
+          - feat
+          - fix
           - refactor
           - perf
           - chore
@@ -23,7 +25,18 @@ policies:
           - docs
           - no_type
         scopes:
+          - config
+          - service
+          - repository
+          - controller
+          - entity
+          - dto
+          - plugin
+          - pom
+          - database
+          - docker
           - release
+          - deployment
           - deps
           - ci
         descriptionLength: 100
