@@ -102,6 +102,7 @@
                     <rulesets>
                         <ruleset>config/pmd/ruleset.xml</ruleset>
                     </rulesets>
+                    <format>sarif</format>
                     <targetJdk>24</targetJdk>
                     <failOnViolation>true</failOnViolation>
                     <failurePriority>3</failurePriority>
