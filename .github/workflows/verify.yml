@@ -44,7 +44,7 @@ jobs:
       - uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165
         with:
           java-version: "${{ matrix.java-version }}"
-          distribution: "corretto"
+          distribution: corretto
 
       - name: Cache Maven packages
         uses: actions/cache@v4
@@ -77,50 +77,18 @@ jobs:
       - uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # v5.0.0
         with:
           java-version: "${{ matrix.java-version }}"
-          distribution: "corretto"
+          distribution: corretto
 
-      - name: Download PMD
-        run: |
-          PMD_VERSION="6.55.0"
-          wget -q https://github.com/pmd/pmd/releases/download/pmd_releases%2F${PMD_VERSION}/pmd-bin-${PMD_VERSION}.zip
-          unzip -q pmd-bin-${PMD_VERSION}.zip
-          echo "$(pwd)/pmd-bin-${PMD_VERSION}/bin" >> $GITHUB_PATH
-
-      - name: Cache PMD ruleset
-        uses: actions/cache@v3
+      - name: Cache Maven packages
+        uses: actions/cache@v4
         with:
-          path: rulesets
-          key: ${{ runner.os }}-pmd-ruleset-${{ hashFiles('rulesets/*.xml') }}
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
-            ${{ runner.os }}-pmd-ruleset-
+            ${{ runner.os }}-maven-
 
-      - name: Run PMD analysis
-        run: |
-          pmd check -d src/main/java \
-          -R rulesets/java-best-practices.xml \
-          -f sarif \
-          -r pmd-results.sarif \
-          --fail-on-violation false
-
-      - name: Upload SARIF results to GitHub
-        uses: github/codeql-action/upload-sarif@v3
-        if: always()
-        with:
-          sarif_file: pmd-results.sarif
-          wait-for-processing: true
-
-      - name: Display PMD results in workflow
-        run: |
-          if [ -f pmd-results.sarif ]; then
-          echo "## PMD Analysis Results" >> $GITHUB_STEP_SUMMARY
-          echo "| Severity | File | Line | Rule | Description |" >> $GITHUB_STEP_SUMMARY
-          echo "|----------|------|------|------|-------------|" >> $GITHUB_STEP_SUMMARY
-                
-          # Extract violations from SARIF (simplified)
-          cat pmd-results.sarif | jq -r '.runs[0].results[]? | "| \(.level) | \(.locations[0].physicalLocation.artifactLocation.uri) | \(.locations[0].physicalLocation.region.startLine) | \(.ruleId) | \(.message.text) |"' >> $GITHUB_STEP_SUMMARY
-            else
-              echo "No PMD results found" >> $GITHUB_STEP_SUMMARY
-            fi
+      - name: Run PMD Analysis
+        run: mvn --batch-mode clean pmd:check
 
   spotbugs:
     runs-on: ubuntu-latest
@@ -139,7 +107,7 @@ jobs:
       - uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # v5.0.0
         with:
           java-version: "${{ matrix.java-version }}"
-          distribution: "temurin"
+          distribution: "corretto"
       - name: Cache Maven packages
         uses: actions/cache@v4
         id: maven-cache
