@@ -97,19 +97,24 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-pmd-plugin</artifactId>
-                <version>3.22.0</version>
+                <version>3.27.0</version>  <!-- latest as per plugin list -->
                 <configuration>
                     <rulesets>
                         <ruleset>config/pmd/ruleset.xml</ruleset>
                     </rulesets>
-                    <includes>
-                        <include>src/main/java/**/*.java</include>
-                    </includes>
-                    <excludes>
-                        <exclude>src/test/java/**/*.java</exclude>
-                        <exclude>**/generated-sources/**</exclude>
-                    </excludes>
+                    <targetJdk>24</targetJdk>
+                    <failOnViolation>true</failOnViolation>
+                    <failurePriority>3</failurePriority>
+                    <printFailingErrors>true</printFailingErrors>
                 </configuration>
+                <executions>
+                    <execution>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
 
             <plugin>
