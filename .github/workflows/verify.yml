@@ -79,33 +79,45 @@ jobs:
           java-version: "${{ matrix.java-version }}"
           distribution: corretto
 
-      - name: Cache Maven packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
-
-      - name: Run PMD Analysis
-        run: mvn --batch-mode clean pmd:check
-
-      - name: Run PMD Analysis
-        run: mvn --batch-mode clean pmd:check pmd:pmd
-
-      - name: Show PMD results in workflow
+      - name: Download PMD
         run: |
-          if [ -f target/pmd.xml ]; then
-            echo "PMD violations found:"
-            cat target/pmd.xml | grep -o '<violation[^>]*>.*</violation>' | head -10
-          fi
+          curl -L https://github.com/pmd/pmd/releases/download/pmd_releases%2F7.10.0/pmd-dist-7.10.0-bin.zip -o pmd.zip
+          unzip pmd.zip -d .
+          mv pmd-bin-7.10.0 pmd
 
-      - name: Upload PMD report
-        uses: actions/upload-artifact@v4
+      - name: Run PMD Analysis
+        run: |
+          ./pmd/bin/pmd check \
+            --dir src/main/java \
+            --rulesets config/pmd/ruleset.xml \
+            --format sarif \
+            --report-file target/pmd/pmd.sarif \
+            --language java \
+            --version 24 \
+            --minimum-priority 5 \
+            --no-fail-on-violation
+
+      - name: Display PMD Violations
+        if: always()
+        run: |
+          echo "PMD Violations Summary:"
+          jq '.runs[0].results[] | "Violation: \(.message.text) | Rule: \(.ruleId) | Priority: \(.properties.priority // "unknown") | File: \(.locations[0].physicalLocation.artifactLocation.uri) | Line: \(.locations[0].physicalLocation.region.startLine)"' target/pmd/pmd.sarif || echo "No violations found."
+
+      - name: Fail on Severe Violations
+        if: always()
+        run: |
+          severe_count=$(jq '[.runs[0].results[] | select(.level == "error" or .level == "warning")] | length' target/pmd/pmd.sarif)
+            if [ "$severe_count" -gt 0 ]; then
+              echo "Failing build due to $severe_count severe violations (priority 1-3)."
+              exit 1
+            fi
+
+      - name: Upload SARIF to GitHub Code Scanning
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
         with:
-          name: pmd-report
-          path: target/pmd.xml
-          retention-days: 30
+          sarif_file: target/pmd/pmd.sarif
+
 
   spotbugs:
     runs-on: ubuntu-latest
