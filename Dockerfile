@@ -1,4 +1,4 @@
 FROM amazoncorretto:24-alpine-jdk
 WORKDIR /app
-COPY target/*.jar app.jar
-ENTRYPOINT ["java", "-jar", "/app/app.jar"]
+COPY target/*.jar group-a-inventory.jar
+ENTRYPOINT ["java", "-jar", "/app/group-a-inventory.jar"]

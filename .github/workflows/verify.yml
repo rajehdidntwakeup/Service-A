@@ -212,7 +212,7 @@ jobs:
           password: ${{ secrets.DOCKER_TOKEN }}
 
       - name: Build image
-        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/my-app:latest .
+        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/group-a-inventory:latest .
 
       - name: Push image
-        run: docker push ${{ secrets.DOCKER_USERNAME }}/my-app:latest
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/group-a-inventory:latest
