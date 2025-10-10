@@ -90,6 +90,15 @@ jobs:
       - name: Run PMD Analysis
         run: mvn --batch-mode clean pmd:check
 
+      - name: Run PMD Analysis
+        run: mvn --batch-mode clean pmd:check pmd:pmd
+
+      - name: Upload PMD SARIF results
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: target/pmd
+          wait-for-processing: true
+
   spotbugs:
     runs-on: ubuntu-latest
     name: SpotBugs

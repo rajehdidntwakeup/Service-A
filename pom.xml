@@ -94,7 +94,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-pmd-plugin</artifactId>
-                <version>3.27.0</version>  <!-- latest as per plugin list -->
+                <version>3.27.0</version>
                 <configuration>
                     <rulesets>
                         <ruleset>config/pmd/ruleset.xml</ruleset>
@@ -103,12 +103,16 @@
                     <failOnViolation>true</failOnViolation>
                     <failurePriority>3</failurePriority>
                     <printFailingErrors>true</printFailingErrors>
+                    <!-- Add SARIF output -->
+                    <format>sarif</format>
+                    <outputDirectory>target/pmd</outputDirectory>
                 </configuration>
                 <executions>
                     <execution>
                         <phase>verify</phase>
                         <goals>
                             <goal>check</goal>
+                            <goal>pmd</goal> <!-- Add this to generate the report -->
                         </goals>
                     </execution>
                 </executions>
