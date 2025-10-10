@@ -88,24 +88,22 @@ jobs:
             ${{ runner.os }}-maven-
 
       - name: Run PMD Analysis
+        run: mvn --batch-mode clean pmd:check
+
+      - name: Run PMD Analysis
         run: mvn --batch-mode clean pmd:check pmd:pmd
 
-      - name: Convert PMD XML to SARIF
-        uses: advanced-security/pmd-sarif@v2
-        with:
-          output: pmd.sarif
-          pmd-version: 6.55.0
+      - name: Show PMD results in workflow
+        run: |
+          if [ -f target/pmd.xml ]; then
+            echo "PMD violations found:"
+            cat target/pmd.xml | grep -o '<violation[^>]*>.*</violation>' | head -10
+          fi
 
-      - name: Upload PMD SARIF results
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: pmd.sarif
-          wait-for-processing: true
-
-      - name: Upload PMD XML report as artifact
+      - name: Upload PMD report
         uses: actions/upload-artifact@v4
         with:
-          name: pmd-xml-report
+          name: pmd-report
           path: target/pmd.xml
           retention-days: 30
 
