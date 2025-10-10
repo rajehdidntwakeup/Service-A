@@ -103,8 +103,7 @@
                     <failOnViolation>true</failOnViolation>
                     <failurePriority>3</failurePriority>
                     <printFailingErrors>true</printFailingErrors>
-                    <!-- Add SARIF output -->
-                    <format>sarif</format>
+                    <format>xml</format>
                     <outputDirectory>target/pmd</outputDirectory>
                 </configuration>
                 <executions>
@@ -112,7 +111,7 @@
                         <phase>verify</phase>
                         <goals>
                             <goal>check</goal>
-                            <goal>pmd</goal> <!-- Add this to generate the report -->
+                            <goal>pmd</goal>
                         </goals>
                     </execution>
                 </executions>
