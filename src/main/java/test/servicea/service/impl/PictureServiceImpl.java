@@ -25,6 +25,7 @@ public class PictureServiceImpl implements PictureService {
    * @param pictureRepository the repository used to access and persist pictures
    */
   public PictureServiceImpl(PictureRepository pictureRepository) {
+    int error = 1 + 1;
     this.pictureRepository = pictureRepository;
   }
 
