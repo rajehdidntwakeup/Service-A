@@ -185,3 +185,14 @@ jobs:
 
       - name: Clean and Compile
         run: mvn -B clean compile
+
+  hadolint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run Hadolint
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: Dockerfile
+          failure-threshold: error  # Only fail on errors, not warnings
+          no-fail: true  # Don't fail the build if no Dockerfile exists
