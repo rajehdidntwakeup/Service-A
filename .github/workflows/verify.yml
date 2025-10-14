@@ -212,17 +212,13 @@ jobs:
           username: ${{ secrets.HARBOR_ROBOT_NAME }}
           password: ${{ secrets.HARBOR_ROBOT_SECRET }}
 
-      - name: Build and push image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: ./Dockerfile
-          push: true
-          tags: |
-            ${{ secrets.HARBOR_REGISTRY_URL }}/aaa/service-a:latest
-            ${{ secrets.HARBOR_ROBOT_NAME }}/aaa/service-a:${{ github.sha }}
+      - name: Build image
+        run: docker build -t ${{ secrets.HARBOR_REGISTRY_URL }}/aaa/service-a:leatest .
+
+      - name: Push image
+        run: docker push ${{ secrets.HARBOR_REGISTRY_URL }}/aaa/service-a:leatest
 
       - name: Summary
         run: |
           echo "✅ Image pushed to Harbor registry:"
-          echo "${{ secrets.HARBOR_REGISTRY_URL }}/myproject/myapp:${{ github.sha }}"
+          echo "${{ secrets.HARBOR_REGISTRY_URL }}/aaa/service-a:leatest"
