@@ -190,7 +190,7 @@ jobs:
 
   docker-build:
     runs-on: ubuntu-latest
-    needs: build
+    #needs: build
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
@@ -208,9 +208,9 @@ jobs:
       - name: Log in to Harbor
         uses: docker/login-action@v2
         with:
-          registry: ${{ secrets.HARBOR_REGISTRY }}
-          username: ${{ secrets.HARBOR_USERNAME }}
-          password: ${{ secrets.HARBOR_PASSWORD }}
+          registry: ${{ secrets.HARBOR_REGISTRY_URL }}
+          username: ${{ secrets.HARBOR_ROBOT_NAME }}
+          password: ${{ secrets.HARBOR_ROBOT_SECRET }}
 
       - name: Build and push image
         uses: docker/build-push-action@v6
@@ -219,10 +219,10 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: |
-            ${{ secrets.HARBOR_REGISTRY }}/group-a-inventory:latest
-            ${{ secrets.DOCKER_USERNAME }}/group-a-inventory:${{ github.sha }}
+            ${{ secrets.HARBOR_REGISTRY_URL }}/group-a-inventory:latest
+            ${{ secrets.HARBOR_ROBOT_NAME }}/group-a-inventory:${{ github.sha }}
 
       - name: Summary
         run: |
           echo "✅ Image pushed to Harbor registry:"
-          echo "${{ secrets.HARBOR_REGISTRY }}/myproject/myapp:${{ github.sha }}"
+          echo "${{ secrets.HARBOR_REGISTRY_URL }}/myproject/myapp:${{ github.sha }}"
