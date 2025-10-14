@@ -219,8 +219,8 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: |
-            ${{ secrets.HARBOR_REGISTRY_URL }}/group-a-inventory:latest
-            ${{ secrets.HARBOR_ROBOT_NAME }}/group-a-inventory:${{ github.sha }}
+            ${{ secrets.HARBOR_REGISTRY_URL }}//aaa/REPOSITORY:latest
+            ${{ secrets.HARBOR_ROBOT_NAME }}//aaa/REPOSITORY:${{ github.sha }}
 
       - name: Summary
         run: |
