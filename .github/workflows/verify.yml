@@ -219,8 +219,8 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: |
-            ${{ secrets.HARBOR_REGISTRY_URL }}/aaa/REPOSITORY:latest
-            ${{ secrets.HARBOR_ROBOT_NAME }}/aaa/REPOSITORY:${{ github.sha }}
+            ${{ secrets.HARBOR_REGISTRY_URL }}/aaa/service-a:latest
+            ${{ secrets.HARBOR_ROBOT_NAME }}/aaa/service-a:${{ github.sha }}
 
       - name: Summary
         run: |
