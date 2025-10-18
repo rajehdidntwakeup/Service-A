@@ -187,10 +187,40 @@ jobs:
       - name: Clean and Compile
         run: mvn -B clean compile
 
+  hadolint:
+    name: Hadolint
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Check if Dockerfile exists
+        id: check_dockerfile
+        run: |
+          if [ -f Dockerfile ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run Hadolint
+        if: steps.check_dockerfile.outputs.exists == 'true'
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: Dockerfile
+          ignore: DL3008,DL3013  # optional: list of warnings you want to ignore
+
+      - name: Fail only on Hadolint errors
+        if: steps.check_dockerfile.outputs.exists == 'true'
+        run: |
+          # Re-run hadolint manually to control behavior (fail only on errors)
+          hadolint Dockerfile --failure-threshold error
+
 
   docker-build:
     runs-on: ubuntu-latest
-    needs: build
+    needs: hadolint
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
