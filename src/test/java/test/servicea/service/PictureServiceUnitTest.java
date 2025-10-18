@@ -48,7 +48,7 @@ public class PictureServiceUnitTest {
     Picture p2 = new Picture("B", 2, 20.0, "b");
     when(pictureRepository.findAll()).thenReturn(List.of(p1, p2));
 
-    List<Picture> all = pictureService.getAllPictures();
+    List<Picture> all = pictureService.getAllPictures(false);
 
     assertNotNull(all);
     assertEquals(2, all.size());
@@ -59,7 +59,7 @@ public class PictureServiceUnitTest {
   void getAllPictures_empty_returnsEmptyList() {
     when(pictureRepository.findAll()).thenReturn(List.of());
 
-    List<Picture> all = pictureService.getAllPictures();
+    List<Picture> all = pictureService.getAllPictures(false);
 
     assertNotNull(all);
     assertTrue(all.isEmpty());
@@ -161,7 +161,7 @@ public class PictureServiceUnitTest {
   @Test
   void getAllPictures_repositoryThrows_runtimePropagates() {
     when(pictureRepository.findAll()).thenThrow(new RuntimeException("db error"));
-    assertThrows(RuntimeException.class, () -> pictureService.getAllPictures());
+    assertThrows(RuntimeException.class, () -> pictureService.getAllPictures(false));
     verify(pictureRepository).findAll();
   }
 

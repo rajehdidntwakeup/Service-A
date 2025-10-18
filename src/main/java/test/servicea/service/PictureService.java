@@ -21,11 +21,14 @@ public interface PictureService {
   Picture createPicture(PictureDto pictureDto);
 
   /**
-   * Retrieves all Picture entities.
+   * Retrieves a list of all Picture entities. The list may include pictures
+   * from either a single catalog or multiple catalogs, based on the provided flag.
    *
+   * @param multiCatalog a boolean flag indicating whether to include pictures
+   *                      from multiple catalogs (true) or a single catalog (false)
    * @return a list of Picture entities
    */
-  List<Picture> getAllPictures();
+  List<Picture> getAllPictures(boolean multiCatalog);
 
   /**
    * Retrieves a Picture entity by its unique ID.
