@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import test.servicea.domain.Picture;
 import test.servicea.domain.dto.PictureDto;
@@ -51,13 +52,18 @@ public class PictureController {
   }
 
   /**
-   * Retrieves a list of all pictures available in the inventory.
+   * Retrieves a list of all pictures, optionally across multiple catalogs, based on the provided parameter.
    *
-   * @return a ResponseEntity containing a list of Picture objects with an HTTP status of 200 (OK)
+   * @param multiCatalog a boolean flag indicating whether to retrieve pictures
+   *                     from multiple catalogs (true) or a single catalog (false);
+   *                     defaults to false if not specified
+   * @return a ResponseEntity containing a list of Picture objects along with an HTTP status of 200 (OK)
    */
   @GetMapping
-  public ResponseEntity<List<Picture>> getAllPictures() {
-    List<Picture> pictures = pictureService.getAllPictures();
+  public ResponseEntity<List<Picture>> getAllPictures(
+      @RequestParam(name = "multi-catalog", required = false, defaultValue = "false") boolean multiCatalog
+  ) {
+    List<Picture> pictures = pictureService.getAllPictures(multiCatalog);
     return ResponseEntity.ok(pictures);
   }
 

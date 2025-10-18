@@ -78,27 +78,27 @@ public class PictureControllerUnitTest {
     Picture p2 = new Picture("B", 3, 20.0, "b");
     List<Picture> list = Arrays.asList(p1, p2);
 
-    when(pictureService.getAllPictures()).thenReturn(list);
+    when(pictureService.getAllPictures(false)).thenReturn(list);
 
-    ResponseEntity<List<Picture>> response = controller.getAllPictures();
+    ResponseEntity<List<Picture>> response = controller.getAllPictures(false);
 
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
     assertEquals(2, response.getBody().size());
     assertEquals(list, response.getBody());
-    verify(pictureService).getAllPictures();
+    verify(pictureService).getAllPictures(false);
   }
 
   @Test
   void getAllPictures_empty_returnsOkEmpty() {
-    when(pictureService.getAllPictures()).thenReturn(Collections.emptyList());
+    when(pictureService.getAllPictures(false)).thenReturn(Collections.emptyList());
 
-    ResponseEntity<List<Picture>> response = controller.getAllPictures();
+    ResponseEntity<List<Picture>> response = controller.getAllPictures(false);
 
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
     assertTrue(response.getBody().isEmpty());
-    verify(pictureService).getAllPictures();
+    verify(pictureService).getAllPictures(false);
   }
 
   @Test

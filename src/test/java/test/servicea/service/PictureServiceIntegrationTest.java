@@ -39,7 +39,7 @@ public class PictureServiceIntegrationTest {
         pictureService.createPicture(pictureDto1);
         pictureService.createPicture(pictureDto2);
 
-        List<Picture> pictures = pictureService.getAllPictures();
+        List<Picture> pictures = pictureService.getAllPictures(false);
 
         assertEquals(2, pictures.size());
     }
@@ -85,7 +85,7 @@ public class PictureServiceIntegrationTest {
 
     @Test
     public void testGetAllPicturesWhenEmpty() {
-        List<Picture> pictures = pictureService.getAllPictures();
+        List<Picture> pictures = pictureService.getAllPictures(false);
         assertTrue(pictures.isEmpty());
     }
 }

@@ -40,7 +40,7 @@ public class PictureServiceImpl implements PictureService {
   }
 
   @Override
-  public List<Picture> getAllPictures() {
+  public List<Picture> getAllPictures(boolean multiCatalog) {
     List<Picture> pictures = pictureRepository.findAll();
     if (!pictures.isEmpty()) {
       return pictures;
