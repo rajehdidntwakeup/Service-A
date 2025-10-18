@@ -191,6 +191,7 @@ jobs:
     name: Hadolint
     runs-on: ubuntu-latest
     needs: build
+
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
@@ -204,17 +205,22 @@ jobs:
             echo "exists=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Run Hadolint
+      - name: Run Hadolint (via official action)
         if: steps.check_dockerfile.outputs.exists == 'true'
         uses: hadolint/hadolint-action@v3.1.0
         with:
           dockerfile: Dockerfile
-          ignore: DL3008,DL3013  # optional: list of warnings you want to ignore
+          ignore: DL3008,DL3013  # optional: ignore some rules
+
+      - name: Install Hadolint on runner
+        if: steps.check_dockerfile.outputs.exists == 'true'
+        run: |
+          wget -O /usr/local/bin/hadolint https://github.com/hadolint/hadolint/releases/latest/download/hadolint-Linux-x86_64
+          chmod +x /usr/local/bin/hadolint
 
       - name: Fail only on Hadolint errors
         if: steps.check_dockerfile.outputs.exists == 'true'
         run: |
-          # Re-run hadolint manually to control behavior (fail only on errors)
           hadolint Dockerfile --failure-threshold error
 
 
