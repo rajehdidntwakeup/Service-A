@@ -223,7 +223,7 @@ jobs:
           hadolint Dockerfile --failure-threshold error
 
 
-  docker-build:
+  container-build:
     runs-on: ubuntu-latest
     needs: hadolint
     steps:
