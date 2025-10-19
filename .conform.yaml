@@ -39,4 +39,6 @@ policies:
           - deployment
           - deps
           - ci
+          - license
+          - readme
         descriptionLength: 100
