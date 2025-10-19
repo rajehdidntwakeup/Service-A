@@ -4,9 +4,9 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 
 /**
- * Data Transfer Object for Picture.
+ * Data Transfer Object for Item.
  */
-public class PictureDto {
+public class ItemDto {
 
   @NotBlank(message = "Name is mandatory.")
   private String name;
@@ -18,20 +18,20 @@ public class PictureDto {
   private String description;
 
   /**
-   * Creates an empty PictureDto instance.
+   * Creates an empty ItemDto instance.
    */
-  public PictureDto() {
+  public ItemDto() {
   }
 
   /**
-   * Creates a PictureDto with the provided attributes.
+   * Creates an ItemDto with the provided attributes.
    *
-   * @param name        the name of the picture
-   * @param stock       the available stock of the picture
-   * @param price       the price of the picture
-   * @param description a description of the picture
+   * @param name        the name of the item
+   * @param stock       the available stock of the item
+   * @param price       the price of the item
+   * @param description a description of the item
    */
-  public PictureDto(String name, int stock, double price, String description) {
+  public ItemDto(String name, int stock, double price, String description) {
     this.name = name;
     this.stock = stock;
     this.price = price;
@@ -39,16 +39,16 @@ public class PictureDto {
   }
 
   /**
-   * Retrieves the name of the picture.
+   * Retrieves the name of the item.
    *
-   * @return the name of the picture as a String.
+   * @return the name of the item as a String.
    */
   public String getName() {
     return name;
   }
 
   /**
-   * Sets the name of the picture.
+   * Sets the name of the item.
    *
    * @param name the name to set, represented as a String
    */
@@ -57,7 +57,7 @@ public class PictureDto {
   }
 
   /**
-   * Retrieves the stock quantity of the picture.
+   * Retrieves the stock quantity of the item.
    *
    * @return the stock quantity as an integer.
    */
@@ -66,7 +66,7 @@ public class PictureDto {
   }
 
   /**
-   * Sets the stock quantity of the picture.
+   * Sets the stock quantity of the item.
    *
    * @param stock the stock quantity to set, represented as an integer
    */
@@ -75,16 +75,16 @@ public class PictureDto {
   }
 
   /**
-   * Retrieves the price of the picture.
-   * @return the price of the picture as a double
+   * Retrieves the price of the item.
+   * @return the price of the item as a double
    */
   public double getPrice() {
     return price;
   }
 
   /**
-   * Sets the price of the picture.
-   * @return the price of the picture as a double
+   * Sets the price of the item.
+   * @return the price of the item as a double
    */
   public String getDescription() {
     return description;

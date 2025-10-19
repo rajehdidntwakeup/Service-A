@@ -1,7 +1,6 @@
 name: Verify
 
 on:
-  push:
   pull_request:
     branches:
       - main
@@ -167,11 +166,12 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
+    name: Build
     needs:
-      - test
       - checkstyle
       - pmd
       - spotbugs
+      - test
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
@@ -190,6 +190,7 @@ jobs:
     name: Hadolint
     runs-on: ubuntu-latest
     needs: build
+
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
@@ -203,15 +204,56 @@ jobs:
             echo "exists=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Run Hadolint
+      - name: Run Hadolint (via official action)
         if: steps.check_dockerfile.outputs.exists == 'true'
         uses: hadolint/hadolint-action@v3.1.0
         with:
           dockerfile: Dockerfile
-          ignore: DL3008,DL3013  # optional: list of warnings you want to ignore
+          ignore: DL3008,DL3013  # optional: ignore some rules
+
+      - name: Install Hadolint on runner
+        if: steps.check_dockerfile.outputs.exists == 'true'
+        run: |
+          wget -O /usr/local/bin/hadolint https://github.com/hadolint/hadolint/releases/latest/download/hadolint-Linux-x86_64
+          chmod +x /usr/local/bin/hadolint
 
       - name: Fail only on Hadolint errors
         if: steps.check_dockerfile.outputs.exists == 'true'
         run: |
-          # Re-run hadolint manually to control behavior (fail only on errors)
           hadolint Dockerfile --failure-threshold error
+
+
+  container-build:
+    runs-on: ubuntu-latest
+    needs: hadolint
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 24
+        uses: actions/setup-java@v4
+        with:
+          distribution: corretto
+          java-version: 24
+          cache: maven
+
+      - name: Build JAR
+        run: mvn clean package -DskipTests
+
+      - name: Log in to Harbor
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ secrets.HARBOR_REGISTRY_URL }}
+          username: ${{ secrets.HARBOR_ROBOT_NAME }}
+          password: ${{ secrets.HARBOR_ROBOT_SECRET }}
+
+      - name: Build image
+        run: docker build -t ${{ secrets.HARBOR_REGISTRY_URL }}/aaa/service-a:leatest .
+
+      - name: Push image
+        run: docker push ${{ secrets.HARBOR_REGISTRY_URL }}/aaa/service-a:leatest
+
+      - name: Summary
+        run: |
+          echo " Image pushed to Harbor registry:"
+          echo "${{ secrets.HARBOR_REGISTRY_URL }}/aaa/service-a:leatest"

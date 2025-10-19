@@ -2,11 +2,11 @@ package test.servicea.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import test.servicea.domain.Picture;
+import test.servicea.domain.Item;
 
 /**
- * Spring Data repository for Picture entities.
+ * Spring Data repository for Item entities.
  */
 @Repository
-public interface PictureRepository extends JpaRepository<Picture, Integer> {
+public interface ItemRepository extends JpaRepository<Item, Integer> {
 }
