@@ -19,7 +19,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: siderolabs/conform@6380738b7fdfc68b208ce0674c4ac1ba314ba600
+      - uses: siderolabs/conform@v0.1.0-alpha.27
         with:
           token: ${{ secrets.CONFORM }}
 
