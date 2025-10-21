@@ -85,7 +85,7 @@
                         <id>validate-checkstyle</id>
                         <phase>verify</phase>
                         <goals>
-                            <goal>check</goal>
+                            <goal>checkstyle</goal>
                         </goals>
                     </execution>
                 </executions>
@@ -110,7 +110,6 @@
                     <execution>
                         <phase>verify</phase>
                         <goals>
-                            <goal>check</goal>
                             <goal>pmd</goal>
                         </goals>
                     </execution>
