@@ -41,6 +41,7 @@ public class ItemServiceImpl implements ItemService {
 
   @Override
   public List<Item> getAllItems(boolean multiCatalog) {
+    // the multiCatalog parameter is ignored in this implementation
     List<Item> items = itemRepository.findAll();
     if (!items.isEmpty()) {
       return items;
