@@ -248,12 +248,12 @@ jobs:
           password: ${{ secrets.HARBOR_ROBOT_SECRET }}
 
       - name: Build image
-        run: docker build -t ${{ secrets.HARBOR_REGISTRY_URL }}/aaa/service-a:leatest .
+        run: docker build -t ${{ secrets.HARBOR_REGISTRY_URL }}/aaa/service-a:${{ github.sha }} .
 
       - name: Push image
-        run: docker push ${{ secrets.HARBOR_REGISTRY_URL }}/aaa/service-a:leatest
+        run: docker push ${{ secrets.HARBOR_REGISTRY_URL }}/aaa/service-a:${{ github.sha }}
 
       - name: Summary
         run: |
           echo " Image pushed to Harbor registry:"
-          echo "${{ secrets.HARBOR_REGISTRY_URL }}/aaa/service-a:leatest"
+          echo "${{ secrets.HARBOR_REGISTRY_URL }}/aaa/service-a:${{ github.sha }}"
