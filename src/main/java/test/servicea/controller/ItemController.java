@@ -99,4 +99,21 @@ public class ItemController {
     }
     return ResponseEntity.ok(item);
   }
+
+  /**
+   * Retrieves an item resource based on its unique identifier and name.
+   *
+   * @param id the unique identifier of the item to retrieve
+   * @param name the name of the item to retrieve
+   * @return a ResponseEntity containing the item if found with an HTTP status of 200 (OK),
+   *         or an HTTP status of 404 (Not Found) if the item does not exist
+   */
+  @GetMapping("/{id}/itemname/{name}")
+  public ResponseEntity<Item> getItemByIdAndName(@PathVariable int id, @PathVariable String name) {
+    Item item = itemService.getItemByIdAndName(id, name);
+    if (item == null) {
+      return ResponseEntity.notFound().build();
+    }
+    return ResponseEntity.ok(item);
+  }
 }

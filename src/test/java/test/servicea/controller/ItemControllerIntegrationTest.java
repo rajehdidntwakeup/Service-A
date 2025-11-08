@@ -156,4 +156,156 @@ public class ItemControllerIntegrationTest {
                 .content(objectMapper.writeValueAsString(invalidDto)))
                 .andExpect(status().isBadRequest());
     }
+
+    @Test
+    public void testGetItemByIdAndName_Success() throws Exception {
+        ItemDto itemDto = new ItemDto("Combo Item", 7, 77.7, "Combo Desc");
+
+        String response = mockMvc.perform(post("/api/inventory")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(itemDto)))
+                .andReturn().getResponse().getContentAsString();
+
+        Item createdItem = objectMapper.readValue(response, Item.class);
+
+        mockMvc.perform(get("/api/inventory/" + createdItem.getId() + "/itemname/" + createdItem.getName()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(createdItem.getId())))
+                .andExpect(jsonPath("$.name", is(createdItem.getName())))
+                .andExpect(jsonPath("$.stock", is(createdItem.getStock())))
+                .andExpect(jsonPath("$.price", is(createdItem.getPrice())));
+    }
+
+    @Test
+    public void testGetItemByIdAndName_NotFound_WrongName() throws Exception {
+        ItemDto itemDto = new ItemDto("Exact Name", 3, 30.0, "Desc");
+
+        String response = mockMvc.perform(post("/api/inventory")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(itemDto)))
+                .andReturn().getResponse().getContentAsString();
+
+        Item createdItem = objectMapper.readValue(response, Item.class);
+
+        mockMvc.perform(get("/api/inventory/" + createdItem.getId() + "/itemname/" + "Wrong Name"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void testGetItemByIdAndName_BadRequest_InvalidId() throws Exception {
+        mockMvc.perform(get("/api/inventory/fake/itemname/AnyName"))
+                .andExpect(status().isBadRequest());
+    }
+    @Test
+    public void testGetItemByIdAndName_SpacesAndEncoding_Success() throws Exception {
+        ItemDto itemDto = new ItemDto("Item With Space", 5, 12.34, "Has spaces in name");
+
+        String response = mockMvc.perform(post("/api/inventory")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(itemDto)))
+            .andReturn().getResponse().getContentAsString();
+
+        Item createdItem = objectMapper.readValue(response, Item.class);
+
+        mockMvc.perform(get("/api/inventory/{id}/itemname/{name}", createdItem.getId(), createdItem.getName()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.id", is(createdItem.getId())))
+            .andExpect(jsonPath("$.name", is(createdItem.getName())));
+    }
+
+    @Test
+    public void testGetItemByIdAndName_UnicodeName_Success() throws Exception {
+        String unicodeName = "Café ☕️";
+        ItemDto itemDto = new ItemDto(unicodeName, 2, 9.99, "Unicode name");
+
+        String response = mockMvc.perform(post("/api/inventory")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(itemDto)))
+            .andReturn().getResponse().getContentAsString();
+
+        Item createdItem = objectMapper.readValue(response, Item.class);
+
+        mockMvc.perform(get("/api/inventory/{id}/itemname/{name}", createdItem.getId(), unicodeName))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.id", is(createdItem.getId())))
+            .andExpect(jsonPath("$.name", is(unicodeName)));
+    }
+
+    @Test
+    public void testGetItemByIdAndName_CaseMismatch_NotFound() throws Exception {
+        ItemDto itemDto = new ItemDto("CaseSensitive", 1, 1.0, "case test");
+
+        String response = mockMvc.perform(post("/api/inventory")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(itemDto)))
+            .andReturn().getResponse().getContentAsString();
+
+        Item createdItem = objectMapper.readValue(response, Item.class);
+        String wrongCase = createdItem.getName().toLowerCase();
+        String encodedWrongCase = java.net.URLEncoder.encode(wrongCase, java.nio.charset.StandardCharsets.UTF_8);
+
+        mockMvc.perform(get("/api/inventory/" + createdItem.getId() + "/itemname/" + encodedWrongCase))
+            .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void testGetItemByIdAndName_LeadingTrailingSpaces_NotFound() throws Exception {
+        ItemDto itemDto = new ItemDto("TrimTest", 4, 44.0, "trim test");
+
+        String response = mockMvc.perform(post("/api/inventory")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(itemDto)))
+            .andReturn().getResponse().getContentAsString();
+
+        Item createdItem = objectMapper.readValue(response, Item.class);
+        String withSpaces = " " + createdItem.getName() + " ";
+        String encoded = java.net.URLEncoder.encode(withSpaces, java.nio.charset.StandardCharsets.UTF_8);
+
+        mockMvc.perform(get("/api/inventory/" + createdItem.getId() + "/itemname/" + encoded))
+            .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void testGetItemByIdAndName_ZeroId_NotFound() throws Exception {
+        // Ensure there is at least one item with this name to avoid name-not-found masking id handling
+        ItemDto itemDto = new ItemDto("ZeroIdName", 1, 1.0, "");
+        mockMvc.perform(post("/api/inventory")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(itemDto)));
+
+        String encoded = java.net.URLEncoder.encode("ZeroIdName", java.nio.charset.StandardCharsets.UTF_8);
+        mockMvc.perform(get("/api/inventory/0/itemname/" + encoded))
+            .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void testGetItemByIdAndName_NegativeId_NotFound() throws Exception {
+        ItemDto itemDto = new ItemDto("NegativeIdName", 1, 1.0, "");
+        mockMvc.perform(post("/api/inventory")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(itemDto)));
+
+        String encoded = java.net.URLEncoder.encode("NegativeIdName", java.nio.charset.StandardCharsets.UTF_8);
+        mockMvc.perform(get("/api/inventory/-1/itemname/" + encoded))
+            .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void testGetItemByIdAndName_VeryLongName_Success() throws Exception {
+        String longName = "A".repeat(255);
+        ItemDto itemDto = new ItemDto(longName, 8, 88.0, "long name");
+
+        String response = mockMvc.perform(post("/api/inventory")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(itemDto)))
+            .andReturn().getResponse().getContentAsString();
+
+        Item createdItem = objectMapper.readValue(response, Item.class);
+        String encoded = java.net.URLEncoder.encode(longName, java.nio.charset.StandardCharsets.UTF_8);
+
+        mockMvc.perform(get("/api/inventory/" + createdItem.getId() + "/itemname/" + encoded))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.name", is(longName)));
+    }
+
 }
