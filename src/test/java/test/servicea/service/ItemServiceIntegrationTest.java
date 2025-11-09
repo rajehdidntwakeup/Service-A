@@ -88,4 +88,108 @@ public class ItemServiceIntegrationTest {
         List<Item> items = itemService.getAllItems(false);
         assertTrue(items.isEmpty());
     }
+
+    @Test
+    public void testGetItemByIdAndName_Found() {
+        ItemDto itemDto = new ItemDto("Special Item", 7, 77.7, "Special Desc");
+        Item createdItem = itemService.createItem(itemDto);
+
+        Item fetched = itemService.getItemByIdAndName(createdItem.getId(), "Special Item");
+
+        assertNotNull(fetched);
+        assertEquals(createdItem.getId(), fetched.getId());
+        assertEquals("Special Item", fetched.getName());
+        assertEquals(7, fetched.getStock());
+        assertEquals(77.7, fetched.getPrice());
+        assertEquals("Special Desc", fetched.getDescription());
+    }
+
+    @Test
+    public void testGetItemByIdAndName_NotFoundByName() {
+        ItemDto itemDto = new ItemDto("Correct Name", 3, 33.3, "Desc");
+        Item createdItem = itemService.createItem(itemDto);
+
+        Item fetched = itemService.getItemByIdAndName(createdItem.getId(), "Wrong Name");
+
+        assertNull(fetched);
+    }
+
+    @Test
+    public void testGetItemByIdAndName_NotFoundById() {
+        ItemDto itemDto = new ItemDto("Existing Name", 1, 10.0, "D");
+        Item created = itemService.createItem(itemDto);
+
+        Item fetched = itemService.getItemByIdAndName(999999, created.getName());
+
+        assertNull(fetched);
+    }
+
+    @Test
+    public void testGetItemByIdAndName_MismatchedIdExistingName() {
+        ItemDto dtoA = new ItemDto("Alpha", 2, 20.0, "A");
+        ItemDto dtoB = new ItemDto("Beta", 3, 30.0, "B");
+        Item itemA = itemService.createItem(dtoA);
+        Item itemB = itemService.createItem(dtoB);
+
+        // Use A's id with B's name -> should not match
+        Item fetched = itemService.getItemByIdAndName(itemA.getId(), itemB.getName());
+
+        assertNull(fetched);
+    }
+
+    @Test
+    public void testGetItemByIdAndName_EmptyNameProvided() {
+        ItemDto itemDto = new ItemDto("NonEmpty", 1, 10.0, "D");
+        Item created = itemService.createItem(itemDto);
+
+        Item fetched = itemService.getItemByIdAndName(created.getId(), "");
+
+        assertNull(fetched);
+    }
+
+    @Test
+    public void testGetItemByIdAndName_WhitespaceNotTrimmed() {
+        ItemDto itemDto = new ItemDto("TrimMe", 1, 10.0, "D");
+        Item created = itemService.createItem(itemDto);
+
+        Item fetched = itemService.getItemByIdAndName(created.getId(), " TrimMe ");
+
+        assertNull(fetched);
+    }
+
+    @Test
+    public void testGetItemByIdAndName_CaseSensitivity() {
+        ItemDto itemDto = new ItemDto("Case Name", 1, 10.0, "D");
+        Item created = itemService.createItem(itemDto);
+
+        Item fetchedMismatch = itemService.getItemByIdAndName(created.getId(), "case name");
+        assertNull(fetchedMismatch);
+
+        Item fetchedExact = itemService.getItemByIdAndName(created.getId(), "Case Name");
+        assertNotNull(fetchedExact);
+        assertEquals(created.getId(), fetchedExact.getId());
+    }
+
+    @Test
+    public void testGetItemByIdAndName_SpecialCharactersAndUnicode() {
+        String special = "Café ☕ #1";
+        ItemDto itemDto = new ItemDto(special, 2, 12.5, "Unicode");
+        Item created = itemService.createItem(itemDto);
+
+        Item fetchedExact = itemService.getItemByIdAndName(created.getId(), special);
+        assertNotNull(fetchedExact);
+        assertEquals(special, fetchedExact.getName());
+
+        Item fetchedDifferent = itemService.getItemByIdAndName(created.getId(), "Cafe #1");
+        assertNull(fetchedDifferent);
+    }
+
+    @Test
+    public void testGetItemByIdAndName_LargeNonExistentId() {
+        ItemDto itemDto = new ItemDto("LargeID", 1, 10.0, "D");
+        Item created = itemService.createItem(itemDto);
+
+        Item fetched = itemService.getItemByIdAndName(Integer.MAX_VALUE, created.getName());
+        assertNull(fetched);
+    }
 }

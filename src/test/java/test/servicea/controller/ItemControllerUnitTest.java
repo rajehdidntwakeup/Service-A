@@ -148,4 +148,57 @@ public class ItemControllerUnitTest {
     assertNull(response.getBody());
     verify(itemService).updateItemById(99, dto);
   }
+
+  // ------------------ Tests for getItemByIdAndName ------------------
+
+  @Test
+  void getItemByIdAndName_found_returnsOk() {
+    int id = 42;
+    String name = "Combo Item";
+    Item item = new Item(name, 7, 77.7, "desc");
+    when(itemService.getItemByIdAndName(id, name)).thenReturn(item);
+
+    ResponseEntity<Item> response = controller.getItemByIdAndName(id, name);
+
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertSame(item, response.getBody());
+    verify(itemService, times(1)).getItemByIdAndName(id, name);
+  }
+
+  @Test
+  void getItemByIdAndName_notFound_returns404() {
+    int id = 5;
+    String name = "Exact Name";
+    when(itemService.getItemByIdAndName(id, name)).thenReturn(null);
+
+    ResponseEntity<Item> response = controller.getItemByIdAndName(id, name);
+
+    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    assertNull(response.getBody());
+    verify(itemService).getItemByIdAndName(id, name);
+  }
+
+  @Test
+  void getItemByIdAndName_serviceThrows_propagatesException() {
+    int id = 1;
+    String name = "AnyName";
+    when(itemService.getItemByIdAndName(id, name)).thenThrow(new RuntimeException("Service failure"));
+
+    RuntimeException ex = assertThrows(RuntimeException.class, () -> controller.getItemByIdAndName(id, name));
+    assertEquals("Service failure", ex.getMessage());
+    verify(itemService).getItemByIdAndName(id, name);
+  }
+
+  @Test
+  void getItemByIdAndName_emptyName_forwardedAndReturns404() {
+    int id = 10;
+    String name = ""; // empty string should be forwarded as-is
+    when(itemService.getItemByIdAndName(id, name)).thenReturn(null);
+
+    ResponseEntity<Item> response = controller.getItemByIdAndName(id, name);
+
+    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    assertNull(response.getBody());
+    verify(itemService).getItemByIdAndName(id, name);
+  }
 }

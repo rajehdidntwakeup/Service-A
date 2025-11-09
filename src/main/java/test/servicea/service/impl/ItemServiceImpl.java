@@ -69,4 +69,9 @@ public class ItemServiceImpl implements ItemService {
     }
     return null;
   }
+
+  @Override
+  public Item getItemByIdAndName(int id, String name) {
+    return itemRepository.findItemByIdAndName(id, name);
+  }
 }

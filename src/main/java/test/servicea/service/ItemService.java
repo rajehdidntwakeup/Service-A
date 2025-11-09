@@ -48,4 +48,14 @@ public interface ItemService {
   Item updateItemById(int id, ItemDto itemDto);
 
 
+  /**
+   * Retrieves an Item entity by its unique ID and name.
+   *
+   * @param id the unique ID of the Item to retrieve
+   * @param name the name of the Item to retrieve
+   * @return the Item entity that matches the given ID and name, or null if no match is found
+   */
+  Item getItemByIdAndName(int id, String name);
+
+
 }
