@@ -117,8 +117,20 @@ public class ItemController {
     return ResponseEntity.ok(item);
   }
 
+  /**
+   * Updates an existing item identified by its unique identifier and name
+   * using the data provided in the ItemDto object.
+   *
+   * @param id the unique identifier of the item to update
+   * @param name the name of the item to update
+   * @param itemDto the data transfer object containing the updated details of the item
+   * @return a ResponseEntity containing the updated item with an HTTP status of 200 (OK)
+   *         if the update is successful, or an HTTP status of 404 (Not Found)
+   *         if the item with the specified ID and name does not exist
+   */
   @PutMapping("/{id}/itemname/{name}")
-  public ResponseEntity<Item> updateItemByIdAndName(@PathVariable int id, @PathVariable String name, @Valid @RequestBody ItemDto itemDto) {
+  public ResponseEntity<Item> updateItemByIdAndName(@PathVariable int id, @PathVariable String name,
+                                                    @Valid @RequestBody ItemDto itemDto) {
     Item item = itemService.updateItemByIdAndName(id, name, itemDto);
     if (item == null) {
       return ResponseEntity.notFound().build();
