@@ -58,4 +58,14 @@ public interface ItemService {
   Item getItemByIdAndName(int id, String name);
 
 
+
+  /**
+   * Updates an existing Item entity identified by its unique ID and name.
+   *
+   * @param id the unique ID of the Item to update
+   * @param name the name of the Item to update
+   * @param itemDto the new data to update the Item with
+   * @return the updated Item entity
+   */
+  Item updateItemByIdAndName(int id, String name, ItemDto itemDto);
 }

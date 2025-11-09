@@ -313,4 +313,122 @@ public class ItemServiceUnitTest {
     verify(itemRepository, times(1)).findItemByIdAndName(id, lower);
   }
 
+  @Test
+  void updateItemByIdAndName_found_updatesFieldsAndSaves() {
+    int id = 101;
+    String name = "Widget";
+    Item existing = new Item(name, 5, 10.0, "old");
+    when(itemRepository.findItemByIdAndName(id, name)).thenReturn(existing);
+    when(itemRepository.save(any(Item.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+    ItemDto update = new ItemDto("NewName", 9, 99.99, "new desc");
+
+    Item result = itemService.updateItemByIdAndName(id, name, update);
+
+    assertNotNull(result);
+    assertSame(existing, result);
+    assertEquals("NewName", result.getName());
+    assertEquals(9, result.getStock());
+    assertEquals(99.99, result.getPrice());
+    assertEquals("new desc", result.getDescription());
+    verify(itemRepository, times(1)).findItemByIdAndName(id, name);
+    verify(itemRepository, times(1)).save(existing);
+  }
+
+  @Test
+  void updateItemByIdAndName_notFound_returnsNullAndDoesNotSave() {
+    int id = 202;
+    String name = "Missing";
+    when(itemRepository.findItemByIdAndName(id, name)).thenReturn(null);
+
+    ItemDto update = new ItemDto("X", 0, 0.0, "x");
+
+    Item result = itemService.updateItemByIdAndName(id, name, update);
+
+    assertNull(result);
+    verify(itemRepository, times(1)).findItemByIdAndName(id, name);
+    verify(itemRepository, times(0)).save(any());
+  }
+
+  @Test
+  void updateItemByIdAndName_nullDto_throwsNullPointerException() {
+    int id = 303;
+    String name = "HasItem";
+    Item existing = new Item(name, 1, 1.0, "desc");
+    when(itemRepository.findItemByIdAndName(id, name)).thenReturn(existing);
+
+    assertThrows(NullPointerException.class, () -> itemService.updateItemByIdAndName(id, name, null));
+    verify(itemRepository, times(1)).findItemByIdAndName(id, name);
+    verify(itemRepository, never()).save(any());
+  }
+
+  @Test
+  void updateItemByIdAndName_findThrows_exceptionPropagates() {
+    int id = 404;
+    String name = "Boom";
+    when(itemRepository.findItemByIdAndName(id, name)).thenThrow(new RuntimeException("db down"));
+
+    ItemDto update = new ItemDto("Any", 2, 2.0, "any");
+
+    assertThrows(RuntimeException.class, () -> itemService.updateItemByIdAndName(id, name, update));
+    verify(itemRepository, times(1)).findItemByIdAndName(id, name);
+    verify(itemRepository, never()).save(any());
+  }
+
+  @Test
+  void updateItemByIdAndName_saveThrows_exceptionPropagates() {
+    int id = 505;
+    String name = "WillSave";
+    Item existing = new Item(name, 2, 2.0, "old");
+    when(itemRepository.findItemByIdAndName(id, name)).thenReturn(existing);
+    when(itemRepository.save(any(Item.class))).thenThrow(new RuntimeException("save failed"));
+
+    ItemDto update = new ItemDto("N", 3, 3.0, "n");
+
+    assertThrows(RuntimeException.class, () -> itemService.updateItemByIdAndName(id, name, update));
+    verify(itemRepository, times(1)).findItemByIdAndName(id, name);
+    verify(itemRepository, times(1)).save(existing);
+  }
+
+  @Test
+  void updateItemByIdAndName_nullName_found_updatesAndSaves() {
+    int id = 606;
+    Item existing = new Item(null, 0, 0.0, "null name");
+    when(itemRepository.findItemByIdAndName(id, null)).thenReturn(existing);
+    when(itemRepository.save(any(Item.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+    ItemDto update = new ItemDto("Updated", 4, 4.4, "u");
+
+    Item result = itemService.updateItemByIdAndName(id, null, update);
+
+    assertNotNull(result);
+    assertEquals("Updated", result.getName());
+    assertEquals(4, result.getStock());
+    assertEquals(4.4, result.getPrice());
+    assertEquals("u", result.getDescription());
+    verify(itemRepository, times(1)).findItemByIdAndName(id, null);
+    verify(itemRepository, times(1)).save(existing);
+  }
+
+  @Test
+  void updateItemByIdAndName_negativeId_found_updatesAndSaves() {
+    int id = -7;
+    String name = "Neg";
+    Item existing = new Item(name, 10, 10.0, "old");
+    when(itemRepository.findItemByIdAndName(id, name)).thenReturn(existing);
+    when(itemRepository.save(any(Item.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+    ItemDto update = new ItemDto("NegUpdated", 11, 11.11, "new");
+
+    Item result = itemService.updateItemByIdAndName(id, name, update);
+
+    assertNotNull(result);
+    assertEquals("NegUpdated", result.getName());
+    assertEquals(11, result.getStock());
+    assertEquals(11.11, result.getPrice());
+    assertEquals("new", result.getDescription());
+    verify(itemRepository, times(1)).findItemByIdAndName(id, name);
+    verify(itemRepository, times(1)).save(existing);
+  }
+
 }

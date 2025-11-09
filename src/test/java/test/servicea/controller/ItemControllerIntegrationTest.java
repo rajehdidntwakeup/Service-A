@@ -308,4 +308,102 @@ public class ItemControllerIntegrationTest {
             .andExpect(jsonPath("$.name", is(longName)));
     }
 
+    @Test
+    public void testUpdateItemByIdAndName_Success_UpdatesAndPersists() throws Exception {
+        // Arrange: create an item
+        ItemDto original = new ItemDto("OriginalCtrl", 5, 50.0, "orig desc");
+        String createdJson = mockMvc.perform(post("/api/inventory")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(original)))
+            .andReturn().getResponse().getContentAsString();
+        Item created = objectMapper.readValue(createdJson, Item.class);
+
+        // Act: update via controller using id+name (also change the name)
+        ItemDto update = new ItemDto("RenamedCtrl", 7, 77.7, "updated");
+        mockMvc.perform(put("/api/inventory/{id}/itemname/{name}", created.getId(), created.getName())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(update)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.id", is(created.getId())))
+            .andExpect(jsonPath("$.name", is("RenamedCtrl")))
+            .andExpect(jsonPath("$.stock", is(7)))
+            .andExpect(jsonPath("$.price", is(77.7)))
+            .andExpect(jsonPath("$.description", is("updated")));
+
+        // Assert persistence by fetching by id
+        mockMvc.perform(get("/api/inventory/{id}", created.getId()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.name", is("RenamedCtrl")))
+            .andExpect(jsonPath("$.stock", is(7)))
+            .andExpect(jsonPath("$.price", is(77.7)))
+            .andExpect(jsonPath("$.description", is("updated")));
+
+        // Old name should no longer match, new name should match
+        mockMvc.perform(get("/api/inventory/{id}/itemname/{name}", created.getId(), "OriginalCtrl"))
+            .andExpect(status().isNotFound());
+        mockMvc.perform(get("/api/inventory/{id}/itemname/{name}", created.getId(), "RenamedCtrl"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.id", is(created.getId())));
+    }
+
+    @Test
+    public void testUpdateItemByIdAndName_NotFound_ReturnsNotFound_andUnchanged() throws Exception {
+        // Non-existent combo
+        ItemDto update = new ItemDto("X", 1, 1.0, "x");
+        mockMvc.perform(put("/api/inventory/{id}/itemname/{name}", 999999, "Nope")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(update)))
+            .andExpect(status().isNotFound());
+
+        // Create a real item
+        ItemDto dto = new ItemDto("RealCtrl", 2, 2.0, "r");
+        String createdJson = mockMvc.perform(post("/api/inventory")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto)))
+            .andReturn().getResponse().getContentAsString();
+        Item created = objectMapper.readValue(createdJson, Item.class);
+
+        // Use wrong name for existing id -> 404
+        mockMvc.perform(put("/api/inventory/{id}/itemname/{name}", created.getId(), "Wrong")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(update)))
+            .andExpect(status().isNotFound());
+
+        // Ensure original item unchanged
+        mockMvc.perform(get("/api/inventory/{id}", created.getId()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.name", is("RealCtrl")))
+            .andExpect(jsonPath("$.stock", is(2)))
+            .andExpect(jsonPath("$.price", is(2.0)))
+            .andExpect(jsonPath("$.description", is("r")));
+    }
+
+    @Test
+    public void testUpdateItemByIdAndName_InvalidBody_BadRequest_andUnchanged() throws Exception {
+        // Arrange: create an item
+        ItemDto dto = new ItemDto("KeepCtrl", 3, 30.0, "k");
+        String createdJson = mockMvc.perform(post("/api/inventory")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto)))
+            .andReturn().getResponse().getContentAsString();
+        Item created = objectMapper.readValue(createdJson, Item.class);
+
+        // Invalid body (violates @Valid constraints)
+        ItemDto invalid = new ItemDto("", -1, -5.0, "");
+        mockMvc.perform(put("/api/inventory/{id}/itemname/{name}", created.getId(), created.getName())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(invalid)))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.status", is(400)))
+            .andExpect(jsonPath("$.error", is("Bad Request")))
+            .andExpect(jsonPath("$.message", is("Validation failed")));
+
+        // Verify DB unchanged
+        mockMvc.perform(get("/api/inventory/{id}", created.getId()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.name", is("KeepCtrl")))
+            .andExpect(jsonPath("$.stock", is(3)))
+            .andExpect(jsonPath("$.price", is(30.0)))
+            .andExpect(jsonPath("$.description", is("k")));
+    }
 }

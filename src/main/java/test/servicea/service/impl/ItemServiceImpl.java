@@ -74,4 +74,18 @@ public class ItemServiceImpl implements ItemService {
   public Item getItemByIdAndName(int id, String name) {
     return itemRepository.findItemByIdAndName(id, name);
   }
+
+  @Override
+  public Item updateItemByIdAndName(int id, String name, ItemDto itemDto) {
+    Item item = getItemByIdAndName(id, name);
+    if (item != null) {
+      item.setName(itemDto.getName());
+      item.setStock(itemDto.getStock());
+      item.setPrice(itemDto.getPrice());
+      item.setDescription(itemDto.getDescription());
+      itemRepository.save(item);
+      return item;
+    }
+    return null;
+  }
 }

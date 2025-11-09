@@ -192,4 +192,80 @@ public class ItemServiceIntegrationTest {
         Item fetched = itemService.getItemByIdAndName(Integer.MAX_VALUE, created.getName());
         assertNull(fetched);
     }
+
+    @Test
+    public void testUpdateItemByIdAndName_Found_UpdatesAndPersists() {
+        // Arrange: create an item
+        ItemDto original = new ItemDto("Original", 5, 50.0, "orig desc");
+        Item created = itemService.createItem(original);
+        int id = created.getId();
+        String originalName = created.getName();
+
+        // Act: update by id and original name (also change the name)
+        ItemDto update = new ItemDto("Renamed", 7, 77.7, "updated");
+        Item updated = itemService.updateItemByIdAndName(id, originalName, update);
+
+        // Assert: returned object has new values
+        assertNotNull(updated);
+        assertEquals("Renamed", updated.getName());
+        assertEquals(7, updated.getStock());
+        assertEquals(77.7, updated.getPrice());
+        assertEquals("updated", updated.getDescription());
+
+        // And it was persisted: fetch by id
+        Item byId = itemService.getItemById(id);
+        assertNotNull(byId);
+        assertEquals("Renamed", byId.getName());
+        assertEquals(7, byId.getStock());
+        assertEquals(77.7, byId.getPrice());
+        assertEquals("updated", byId.getDescription());
+
+        // Old name no longer matches, new name does
+        assertNull(itemService.getItemByIdAndName(id, originalName));
+        Item byNewName = itemService.getItemByIdAndName(id, "Renamed");
+        assertNotNull(byNewName);
+        assertEquals(id, byNewName.getId());
+    }
+
+    @Test
+    public void testUpdateItemByIdAndName_NotFound_ReturnsNull() {
+        // No items exist for this combo
+        ItemDto update = new ItemDto("X", 1, 1.0, "x");
+        Item result = itemService.updateItemByIdAndName(999999, "Nope", update);
+        assertNull(result);
+
+        // Also verify with a partially existing case: create an item and use wrong name
+        ItemDto dto = new ItemDto("Real", 2, 2.0, "r");
+        Item created = itemService.createItem(dto);
+        Item resultWrongName = itemService.updateItemByIdAndName(created.getId(), "Wrong", update);
+        assertNull(resultWrongName);
+
+        // Ensure original item unchanged
+        Item still = itemService.getItemById(created.getId());
+        assertNotNull(still);
+        assertEquals("Real", still.getName());
+        assertEquals(2, still.getStock());
+        assertEquals(2.0, still.getPrice());
+        assertEquals("r", still.getDescription());
+    }
+
+    @Test
+    public void testUpdateItemByIdAndName_NullDto_throwsNullPointerException_andUnchanged() {
+        // Arrange
+        ItemDto dto = new ItemDto("Keep", 3, 30.0, "k");
+        Item created = itemService.createItem(dto);
+        int id = created.getId();
+        String name = created.getName();
+
+        // Act + Assert: expect NPE from null DTO access inside service
+        assertThrows(NullPointerException.class, () -> itemService.updateItemByIdAndName(id, name, null));
+
+        // Verify unchanged in DB
+        Item after = itemService.getItemById(id);
+        assertNotNull(after);
+        assertEquals("Keep", after.getName());
+        assertEquals(3, after.getStock());
+        assertEquals(30.0, after.getPrice());
+        assertEquals("k", after.getDescription());
+    }
 }
