@@ -116,4 +116,13 @@ public class ItemController {
     }
     return ResponseEntity.ok(item);
   }
+
+  @PutMapping("/{id}/itemname/{name}")
+  public ResponseEntity<Item> updateItemByIdAndName(@PathVariable int id, @PathVariable String name, @Valid @RequestBody ItemDto itemDto) {
+    Item item = itemService.updateItemByIdAndName(id, name, itemDto);
+    if (item == null) {
+      return ResponseEntity.notFound().build();
+    }
+    return ResponseEntity.ok(item);
+  }
 }

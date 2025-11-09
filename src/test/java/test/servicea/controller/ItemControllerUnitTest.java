@@ -201,4 +201,58 @@ public class ItemControllerUnitTest {
     assertNull(response.getBody());
     verify(itemService).getItemByIdAndName(id, name);
   }
+
+  // ------------------ Unit tests for updateItemByIdAndName ------------------
+
+  @Test
+  void updateItemByIdAndName_found_returnsOkWithBody() {
+    int id = 123;
+    String name = "Original";
+    ItemDto dto = new ItemDto("Updated", 8, 88.8, "new desc");
+    Item updated = new Item("Updated", 8, 88.8, "new desc");
+    when(itemService.updateItemByIdAndName(id, name, dto)).thenReturn(updated);
+
+    ResponseEntity<Item> response = controller.updateItemByIdAndName(id, name, dto);
+
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertSame(updated, response.getBody());
+    verify(itemService, times(1)).updateItemByIdAndName(id, name, dto);
+  }
+
+  @Test
+  void updateItemByIdAndName_notFound_returns404() {
+    int id = 999;
+    String name = "Missing";
+    ItemDto dto = new ItemDto("DoesNotMatter", 0, 0.0, "n/a");
+    when(itemService.updateItemByIdAndName(id, name, dto)).thenReturn(null);
+
+    ResponseEntity<Item> response = controller.updateItemByIdAndName(id, name, dto);
+
+    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    assertNull(response.getBody());
+    verify(itemService, times(1)).updateItemByIdAndName(id, name, dto);
+  }
+
+  @Test
+  void updateItemByIdAndName_serviceThrows_propagatesException() {
+    int id = 5;
+    String name = "Boom";
+    ItemDto dto = new ItemDto("X", 1, 1.0, "x");
+    when(itemService.updateItemByIdAndName(id, name, dto)).thenThrow(new RuntimeException("save failed"));
+
+    RuntimeException ex = assertThrows(RuntimeException.class, () -> controller.updateItemByIdAndName(id, name, dto));
+    assertEquals("save failed", ex.getMessage());
+    verify(itemService).updateItemByIdAndName(id, name, dto);
+  }
+
+  @Test
+  void updateItemByIdAndName_nullDto_throwsNullPointerException() {
+    int id = 7;
+    String name = "HasItem";
+    when(itemService.updateItemByIdAndName(id, name, null)).thenThrow(new NullPointerException("dto is null"));
+
+    NullPointerException ex = assertThrows(NullPointerException.class, () -> controller.updateItemByIdAndName(id, name, null));
+    assertEquals("dto is null", ex.getMessage());
+    verify(itemService).updateItemByIdAndName(id, name, null);
+  }
 }
