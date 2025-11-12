@@ -197,7 +197,6 @@ jobs:
       - pmd
       - spotbugs
       - test
-      - hadolint
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
@@ -215,7 +214,9 @@ jobs:
 
   container-build:
     runs-on: ubuntu-latest
-    needs: build
+    needs:
+      - build
+      - hadolint
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
