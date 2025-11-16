@@ -20,9 +20,10 @@ jobs:
       - name: Determine release version
         id: version
         run: |
-          if [ -n "${{ github.event.inputs.version }}" ]; then
-            echo "Using manually provided version: ${{ github.event.inputs.version }}"
-            echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+          VERSION_INPUT="${{ github.event.inputs.version }}"
+          if [ -n "$VERSION_INPUT" ]; then
+            echo "Using manually provided version: $VERSION_INPUT"
+            echo "version=$VERSION_INPUT" >> $GITHUB_OUTPUT
           else
             latest_tag=$(git tag --list 'v*' --sort=-v:refname | head -n1)
             if [ -z "$latest_tag" ]; then
@@ -34,6 +35,7 @@ jobs:
             fi
             echo "Auto-incremented version: $new_version"
             echo "version=$new_version" >> $GITHUB_OUTPUT
+          fi
 
       - name: Generate CHANGELOG
         uses: metcalfc/changelog-generator@v4
