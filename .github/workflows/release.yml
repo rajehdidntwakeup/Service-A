@@ -38,41 +38,17 @@ jobs:
             echo "version=${new_version}" >> $GITHUB_OUTPUT
           fi
 
-      - name: Compute base ref for changelog
-        id: base
-        shell: bash
-        run: |
-          TARGET_VERSION='${{ steps.version.outputs.version }}'
-          if [ "${TARGET_VERSION}" = "v1.0.0" ]; then
-            # First release: use the very first commit as base
-            base_ref=$(git rev-list --max-parents=0 HEAD)
-          else
-            # Subsequent releases: use the previous tag as base
-            # Get tags sorted descending semver-like and pick the second one
-            prev_tag=$(git tag --list 'v*' --sort=-v:refname | sed -n '2p')
-            if [ -z "${prev_tag}" ]; then
-              # Fallback to the first commit if no previous tag could be found
-              base_ref=$(git rev-list --max-parents=0 HEAD)
-            else
-              base_ref="${prev_tag}"
-            fi
-          fi
-          echo "Using base ref: ${base_ref}"
-          echo "ref=${base_ref}" >> $GITHUB_OUTPUT
-
-      - name: Ensure initial tag for changelog
-        if: steps.version.outputs.version == 'v1.0.0'
-        run: |
-          git tag v0.0.0 || echo "v0.0.0 already exists"
+      - name: Get first commit SHA
+        id: first_commit
+        run: echo "sha=$(git rev-list --max-parents=0 HEAD)" >> $GITHUB_OUTPUT
 
       - name: Generate CHANGELOG
         id: changelog
         uses: metcalfc/changelog-generator@v4
         with:
           mytoken: ${{ secrets.RELEASE_TOKEN }}
-          # Use the current commit as the head and the computed base ref
-          head-ref: ${{ github.sha }}
-          base-ref: ${{ steps.base.outputs.ref }}
+          head-ref: ${{ steps.version.outputs.version }}
+          base-ref: ${{ steps.first_commit.outputs.sha }}
 
       - name: Ensure CHANGELOG exists
         run: |
