@@ -74,7 +74,7 @@ jobs:
         if: steps.version.outputs.is_first_release == 'false'
         uses: metcalfc/changelog-generator@v4
         with:
-          mytoken: ${{ secrets.RELEASE_TOKEN }}
+          mytoken: ${{ secrets.GITHUB_TOKEN }}
           # Use the correct input name and the previous tag
           base-ref: ${{ steps.version.outputs.latest_tag }}
           head-ref: ${{ steps.version.outputs.version }}
@@ -122,9 +122,9 @@ jobs:
       - name: Log in to Harbor
         uses: docker/login-action@v3
         with:
-          registry: ${{ secrets.HARBOR_REGISTRY }}
-          username: ${{ secrets.HARBOR_USERNAME }}
-          password: ${{ secrets.HARBOR_PASSWORD }}
+          registry: ${{ secrets.HARBOR_REGISTRY_URL }}
+          username: ${{ secrets.HARBOR_ROBOT_NAME }}
+          password: ${{ secrets.HARBOR_ROBOT_SECRET }}
 
       - name: Build JAR
         run: mvn clean package -DskipTests
@@ -135,8 +135,8 @@ jobs:
           context: .
           push: true
           tags: |
-            ${{ secrets.HARBOR_REGISTRY }}/aaa/service-a:${{ steps.version.outputs.version }}
-            ${{ secrets.HARBOR_REGISTRY }}/aaa/service-a:latest
+            ${{ secrets.HARBOR_REGISTRY_URL }}/aaa/service-a:${{ steps.version.outputs.version }}
+            ${{ secrets.HARBOR_REGISTRY_URL }}/aaa/service-a:latest
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
@@ -146,4 +146,4 @@ jobs:
           body: |
             ${{ steps.changelog.outputs.changelog }}
         env:
-          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
