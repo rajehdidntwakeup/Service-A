@@ -22,28 +22,76 @@ jobs:
         shell: bash
         run: |
           VERSION_INPUT="${{ github.event.inputs.version }}"
+          LATEST_TAG=$(git tag --list 'v*' --sort=-v:refname | head -n1)
+
           if [ -n "${VERSION_INPUT}" ]; then
-            echo "Using manually provided version: ${VERSION_INPUT}"
-            echo "version=${VERSION_INPUT}" >> $GITHUB_OUTPUT
+            # Manually provided version
+            NEW_VERSION="${VERSION_INPUT}"
+            IS_FIRST_RELEASE="false"
+          elif [ -z "${LATEST_TAG}" ]; then
+            # Auto-incremented, no previous tag found (First Release)
+            NEW_VERSION="v1.0.0"
+            IS_FIRST_RELEASE="true"
           else
-            latest_tag=$(git tag --list 'v*' --sort=-v:refname | head -n1)
-            if [ -z "${latest_tag}" ]; then
-              new_version="v1.0.0"
-            else
-              IFS='.' read -r major minor patch <<< "${latest_tag#v}"
-              patch=$((patch + 1))
-              new_version="v${major}.${minor}.${patch}"
-            fi
-            echo "Auto-incremented version: ${new_version}"
-            echo "version=${new_version}" >> $GITHUB_OUTPUT
+            # Auto-incremented, previous tag found (Standard Release)
+            IFS='.' read -r major minor patch <<< "${LATEST_TAG#v}"
+            patch=$((patch + 1))
+            NEW_VERSION="v${major}.${minor}.${patch}"
+            IS_FIRST_RELEASE="false"
+          fi
+          
+          echo "version=${NEW_VERSION}" >> $GITHUB_OUTPUT
+          echo "is_first_release=${IS_FIRST_RELEASE}" >> $GITHUB_OUTPUT
+          echo "latest_tag=${LATEST_TAG}" >> $GITHUB_OUTPUT
+          
+          if [ "${IS_FIRST_RELEASE}" == "true" ]; then
+            echo "Identified as First Release: ${NEW_VERSION}"
+          else
+            echo "Next Version: ${NEW_VERSION}"
           fi
 
-      - name: Generate CHANGELOG
-        id: changelog
+      - name: Generate CHANGELOG (First Release)
+        id: changelog_first
+        if: steps.version.outputs.is_first_release == 'true'
+        run: |
+          # Use git log to get all commits since the very beginning
+          CHANGELOG_BODY=$(git log --pretty=format:"* %s ([%h](https://github.com/${{ github.repository }}/commit/%H))" --reverse)
+          # Store the output
+          echo "changelog<<EOF" >> $GITHUB_OUTPUT
+          echo "## New Features and Fixes" >> $GITHUB_OUTPUT
+          echo "${CHANGELOG_BODY}" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Generate CHANGELOG (Standard Release)
+        id: changelog_standard
+        if: steps.version.outputs.is_first_release == 'false'
         uses: metcalfc/changelog-generator@v4
         with:
           mytoken: ${{ secrets.RELEASE_TOKEN }}
+          # Use the correct input name and the previous tag
+          base-ref: ${{ steps.version.outputs.latest_tag }}
           head-ref: ${{ steps.version.outputs.version }}
+
+      - name: Set Release Body Output
+        id: release_body
+        run: |
+          # Use the output from the step that ran
+          if [ "${{ steps.version.outputs.is_first_release }}" == "true" ]; then
+            RELEASE_BODY="${{ steps.changelog_first.outputs.changelog }}"
+          else
+            RELEASE_BODY="${{ steps.changelog_standard.outputs.changelog }}"
+          fi
+          echo "body=${RELEASE_BODY}" >> $GITHUB_OUTPUT
+
+      - name: Set Release Body Output
+        id: release_body
+        run: |
+          if [ "${{ steps.version.outputs.is_first_release }}" == "true" ]; then
+            RELEASE_BODY="${{ steps.changelog_first.outputs.changelog }}"
+          else
+            RELEASE_BODY="${{ steps.changelog_standard.outputs.changelog }}"
+          fi
+          echo "body=${RELEASE_BODY}" >> $GITHUB_OUTPUT
 
       - name: Ensure CHANGELOG exists
         run: |
