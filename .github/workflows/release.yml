@@ -83,16 +83,6 @@ jobs:
           fi
           echo "body=${RELEASE_BODY}" >> $GITHUB_OUTPUT
 
-      - name: Set Release Body Output
-        id: release_body
-        run: |
-          if [ "${{ steps.version.outputs.is_first_release }}" == "true" ]; then
-            RELEASE_BODY="${{ steps.changelog_first.outputs.changelog }}"
-          else
-            RELEASE_BODY="${{ steps.changelog_standard.outputs.changelog }}"
-          fi
-          echo "body=${RELEASE_BODY}" >> $GITHUB_OUTPUT
-
       - name: Ensure CHANGELOG exists
         run: |
           touch CHANGELOG.md
