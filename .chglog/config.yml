@@ -1,0 +1,23 @@
+style: "github"
+template: "CHANGELOG.tpl.md"
+info:
+  title: "Changelog"
+options:
+  commits:
+    filters:
+      Type:
+        - feat
+        - fix
+        - chore
+        - refactor
+    sort_by: "Scope"
+  commit_groups:
+    title_maps:
+      feat: "Features"
+      fix: "Bug Fixes"
+      chore: "Miscellaneous Chores"
+      refactor: "Refactoring"
+  header:
+    pattern: "^(.*)$"
+    pattern_maps:
+      - Subject
