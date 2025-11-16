@@ -5,7 +5,7 @@ on:
     inputs:
       version:
         description: "Release version (optional, e.g. v1.2.3). If not provided, patch version will auto-increment."
-        required: true
+        required: false
 
 jobs:
   create-tag-and-release:
