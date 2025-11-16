@@ -42,7 +42,9 @@ jobs:
         id: changelog
         uses: metcalfc/changelog-generator@v4
         with:
-          myToken: ${{ secrets.RELEASE_TOKEN }}
+          mytoken: ${{ secrets.RELEASE_TOKEN }}
+          base-ref: "v0.0.0"       # fallback if no release exists
+          head-ref: ${{ steps.version.outputs.version }}
 
       - name: Commit and push CHANGELOG
         run: |
