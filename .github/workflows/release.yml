@@ -19,22 +19,24 @@ jobs:
 
       - name: Determine release version
         id: version
+        shell: bash
         run: |
           VERSION_INPUT="${{ github.event.inputs.version }}"
-          if [ -n "$VERSION_INPUT" ]; then
-            echo "Using manually provided version: $VERSION_INPUT"
-            echo "version=$VERSION_INPUT" >> $GITHUB_OUTPUT
+          if [ -n "${VERSION_INPUT}" ]; then
+            echo "Using manually provided version: ${VERSION_INPUT}"
+            echo "version=${VERSION_INPUT}" >> $GITHUB_OUTPUT
           else
             latest_tag=$(git tag --list 'v*' --sort=-v:refname | head -n1)
-            if [ -z "$latest_tag" ]; then
+            if [ -z "${latest_tag}" ]; then
               new_version="v1.0.0"
             else
               IFS='.' read -r major minor patch <<< "${latest_tag#v}"
               patch=$((patch + 1))
               new_version="v${major}.${minor}.${patch}"
             fi
-            echo "Auto-incremented version: $new_version"
-            echo "version=$new_version" >> $GITHUB_OUTPUT
+            echo "Auto-incremented version: ${new_version}"
+            echo "version=${new_version}" >> $GITHUB_OUTPUT
+          fi
 
       - name: Generate CHANGELOG
         id: changelog
