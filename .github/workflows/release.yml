@@ -54,11 +54,14 @@ jobs:
         id: changelog_first
         if: steps.version.outputs.is_first_release == 'true'
         run: |
-          # Use git log to get all commits since the very beginning
+          echo "Generating full changelog via git log..."
           CHANGELOG_BODY=$(git log --pretty=format:"* %s ([%h](https://github.com/${{ github.repository }}/commit/%H))" --reverse)
-          # Store the output
+          
+          # Use EOF delimiter to output multi-line content safely
           echo "changelog<<EOF" >> $GITHUB_OUTPUT
-          echo "## New Features and Fixes" >> $GITHUB_OUTPUT
+          echo "## Initial Release (${{ steps.version.outputs.version }})" >> $GITHUB_OUTPUT
+          echo "" >> $GITHUB_OUTPUT
+          echo "### Commits" >> $GITHUB_OUTPUT
           echo "${CHANGELOG_BODY}" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
@@ -75,13 +78,17 @@ jobs:
       - name: Set Release Body Output
         id: release_body
         run: |
-          # Use the output from the step that ran
+          # Determine which changelog output to use
           if [ "${{ steps.version.outputs.is_first_release }}" == "true" ]; then
             RELEASE_BODY="${{ steps.changelog_first.outputs.changelog }}"
           else
             RELEASE_BODY="${{ steps.changelog_standard.outputs.changelog }}"
           fi
-          echo "body=${RELEASE_BODY}" >> $GITHUB_OUTPUT
+          
+          # Use multi-line delimiter to set the output safely
+          echo "body<<EOF" >> $GITHUB_OUTPUT
+          echo "${RELEASE_BODY}" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Ensure CHANGELOG exists
         run: |
