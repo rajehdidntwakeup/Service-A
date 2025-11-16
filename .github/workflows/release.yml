@@ -38,6 +38,11 @@ jobs:
             echo "version=${new_version}" >> $GITHUB_OUTPUT
           fi
 
+      - name: Ensure initial tag for changelog
+        if: steps.version.outputs.version == 'v1.0.0'
+        run: |
+          git tag v0.0.0 || echo "v0.0.0 already exists"
+
       - name: Generate CHANGELOG
         id: changelog
         uses: metcalfc/changelog-generator@v4
