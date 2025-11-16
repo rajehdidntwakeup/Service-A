@@ -43,7 +43,7 @@ jobs:
           changelog_path: CHANGELOG.md
           config_path: .chglog/config.yml
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
 
       - name: Commit and push CHANGELOG
         run: |
