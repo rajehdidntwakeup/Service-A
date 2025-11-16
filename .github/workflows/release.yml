@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Release version (optional, e.g. v1.2.3). If not provided, patch version will auto-increment."
+        description: "Release version (optional)"
         required: false
 
 jobs:
@@ -12,7 +12,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      pull-requests: write
 
     steps:
       - name: Checkout
@@ -21,102 +20,79 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Determine release version
+      - name: Determine version
         id: version
-        shell: bash
         run: |
           VERSION_INPUT="${{ github.event.inputs.version }}"
           LATEST_TAG=$(git tag --list 'v*' --sort=-v:refname | head -n1)
 
-          if [ -n "${VERSION_INPUT}" ]; then
-            # Manually provided version
-            NEW_VERSION="${VERSION_INPUT}"
-            IS_FIRST_RELEASE="false"
-          elif [ -z "${LATEST_TAG}" ]; then
-            # Auto-incremented, no previous tag found (First Release)
+          if [ -n "$VERSION_INPUT" ]; then
+            NEW_VERSION="$VERSION_INPUT"
+            IS_FIRST="false"
+          elif [ -z "$LATEST_TAG" ]; then
             NEW_VERSION="v1.0.0"
-            IS_FIRST_RELEASE="true"
+            IS_FIRST="true"
           else
-            # Auto-incremented, previous tag found (Standard Release)
             IFS='.' read -r major minor patch <<< "${LATEST_TAG#v}"
             patch=$((patch + 1))
             NEW_VERSION="v${major}.${minor}.${patch}"
-            IS_FIRST_RELEASE="false"
-          fi
-          
-          echo "version=${NEW_VERSION}" >> $GITHUB_OUTPUT
-          echo "is_first_release=${IS_FIRST_RELEASE}" >> $GITHUB_OUTPUT
-          echo "latest_tag=${LATEST_TAG}" >> $GITHUB_OUTPUT
-          
-          if [ "${IS_FIRST_RELEASE}" == "true" ]; then
-            echo "Identified as First Release: ${NEW_VERSION}"
-          else
-            echo "Next Version: ${NEW_VERSION}"
+            IS_FIRST="false"
           fi
 
-      - name: Generate CHANGELOG (First Release)
-        id: changelog_first
-        if: steps.version.outputs.is_first_release == 'true'
-        run: |
-          echo "Generating full changelog via git log..."
-          CHANGELOG_BODY=$(git log --pretty=format:"* %s ([%h](https://github.com/${{ github.repository }}/commit/%H))" --reverse)
-          
-          # Use EOF delimiter to output multi-line content safely
-          echo "changelog<<EOF" >> $GITHUB_OUTPUT
-          echo "## Initial Release (${{ steps.version.outputs.version }})" >> $GITHUB_OUTPUT
-          echo "" >> $GITHUB_OUTPUT
-          echo "### Commits" >> $GITHUB_OUTPUT
-          echo "${CHANGELOG_BODY}" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "is_first=$IS_FIRST" >> $GITHUB_OUTPUT
+          echo "latest_tag=$LATEST_TAG" >> $GITHUB_OUTPUT
 
-      - name: Generate CHANGELOG (Standard Release)
-        id: changelog_standard
-        if: steps.version.outputs.is_first_release == 'false'
-        uses: metcalfc/changelog-generator@v4
+      - name: Build Changelog
+        id: build_changelog
+        uses: mikepenz/release-changelog-builder-action@v6
         with:
-          mytoken: ${{ secrets.GITHUB_TOKEN }}
-          # Use the correct input name and the previous tag
-          base-ref: ${{ steps.version.outputs.latest_tag }}
-          head-ref: ${{ steps.version.outputs.version }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fromTag: ${{ steps.version.outputs.latest_tag }}
+          toTag: ${{ steps.version.outputs.version }}
+          configuration: ".chglog/changelog-config.json"
 
-      - name: Set Release Body Output
-        id: release_body
+      - name: Update CHANGELOG.md
         run: |
-          # Determine which changelog output to use
-          if [ "${{ steps.version.outputs.is_first_release }}" == "true" ]; then
-            RELEASE_BODY="${{ steps.changelog_first.outputs.changelog }}"
-          else
-            RELEASE_BODY="${{ steps.changelog_standard.outputs.changelog }}"
+          VERSION="${{ steps.version.outputs.version }}"
+          DATE=$(date +'%Y-%m-%d')
+
+          # Prepend or create CHANGELOG.md
+          if [ ! -f CHANGELOG.md ]; then
+            echo "# Changelog" > CHANGELOG.md
           fi
-          
-          # Use multi-line delimiter to set the output safely
-          echo "body<<EOF" >> $GITHUB_OUTPUT
-          echo "${RELEASE_BODY}" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
 
-      - name: Ensure CHANGELOG exists
-        run: |
-          touch CHANGELOG.md
+          # Build the version header
+          REPO="${{ github.repository }}"
+          LATEST="${{ steps.version.outputs.latest_tag }}"
+          HEADER="## [$VERSION](https://github.com/$REPO/compare/$LATEST...$VERSION) ($DATE)"
 
-      - name: Commit and push CHANGELOG
-        run: |
+          # Combine header + changelog + old content
+          {
+            echo ""
+            echo "$HEADER"
+            echo ""
+            echo "${{ steps.build_changelog.outputs.changelog }}"
+            echo ""
+            cat CHANGELOG.md
+          } > CHANGELOG.tmp
+          mv CHANGELOG.tmp CHANGELOG.md
+
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
           git add CHANGELOG.md
-          git commit -m "chore: update CHANGELOG for ${{ steps.version.outputs.version }}" || echo "No changes to commit"
+          git commit -m "chore: update CHANGELOG for $VERSION" || echo "No changes to commit"
           git push origin main
 
-      - name: Create tag
+      - name: Create Tag
         run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
           git tag ${{ steps.version.outputs.version }}
           git push origin ${{ steps.version.outputs.version }}
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
-      - name: Set up Docker Buildx
+      - name: Set up Buildx
         uses: docker/setup-buildx-action@v3
 
       - name: Log in to Harbor
@@ -129,7 +105,7 @@ jobs:
       - name: Build JAR
         run: mvn clean package -DskipTests
 
-      - name: Build and push image to Harbor
+      - name: Build and Push Docker Image
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -143,7 +119,6 @@ jobs:
         with:
           tag_name: ${{ steps.version.outputs.version }}
           name: Release ${{ steps.version.outputs.version }}
-          body: |
-            ${{ steps.changelog.outputs.changelog }}
+          body: ${{ steps.build_changelog.outputs.changelog }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
