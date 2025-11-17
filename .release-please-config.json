@@ -32,13 +32,6 @@
           "section": "Continuous Integration",
           "hidden": true
         }
-      ],
-      "extra-files": [
-        {
-          "type": "xml",
-          "path": "pom.xml",
-          "xpath": "/project/version"
-        }
       ]
     }
   }
