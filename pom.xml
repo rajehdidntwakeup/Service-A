@@ -9,7 +9,7 @@
     </parent>
     <groupId>test</groupId>
     <artifactId>service-A</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1-SNAPSHOT</version>
     <name>service-A</name>
     <description>service-A</description>
     <packaging>jar</packaging>
