@@ -46,7 +46,7 @@ jobs:
       id-token: write
       packages: write
       attestations: write
-    if: ${{ needs.release.outputs.release_created == 'true' }}
+    if: success() && github.ref == 'refs/heads/main'
     strategy:
       max-parallel: 4
       matrix:
