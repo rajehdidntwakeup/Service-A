@@ -11,37 +11,6 @@ permissions:
   pull-requests: write
 
 jobs:
-  token_test:
-    name: Token Access Test
-    runs-on: ubuntu-latest
-    # We set these permissions to match what release-please needed, though 'read' should suffice for the test
-    permissions:
-      contents: read
-      pull-requests: read
-    steps:
-      - name: Attempt to List Pull Requests
-        run: |
-          echo "Testing if the GITHUB_TOKEN can access the PR endpoint..."
-          # Fetch the HTTP status line from the Pull Requests API endpoint
-          CURL_OUTPUT=$(curl -I -s -X GET \
-            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            "https://api.github.com/repos/${{ github.repository }}/pulls" \
-            | head -n 1)
-          
-          echo "CURL Response Header:"
-          echo "$CURL_OUTPUT"
-          
-          # Check for success (200 OK) or failure (404 Not Found / 403 Forbidden)
-          if echo "$CURL_OUTPUT" | grep -q "200"; then
-            echo "✅ SUCCESS: Token has READ access to the Pull Request API."
-          else
-            echo "❌ FAILURE: Token returned an error status (404/403). The issue is with token authorization, not release-please logic."
-            exit 1
-          fi
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-
   release:
     name: Create Release
     runs-on: ubuntu-latest
