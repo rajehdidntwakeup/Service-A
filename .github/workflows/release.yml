@@ -1,131 +1,77 @@
+---
 name: Release
 
 on:
-  workflow_dispatch:
-    inputs:
-      version:
-        description: "Release version (optional)"
-        required: false
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  pull-requests: write
+  id-token: write
+  packages: write
 
 jobs:
-  create-tag-and-release:
+  release:
+    name: Create Release
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
+
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
 
     steps:
-      - name: Checkout
+      - name: Security Audit (Harden Runner)
+        uses: step-security/harden-runner@95d9a5deda9de15063e7595e9719c11c38c90ae2
+        with:
+          egress-policy: 'audit'
+
+      - name: Run Release Please
+        id: release
+        uses: google-github-actions/release-please-action@v4
+        with:
+          config-file: .release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+  container:
+    name: Build & Push Container to Harbor
+    runs-on: ubuntu-latest
+    needs: release
+    if: ${{ needs.release.outputs.release_created == 'true' }}
+    strategy:
+      max-parallel: 4
+      matrix:
+        java-version: [ "24" ]
+
+    steps:
+      - name: Checkout Code
         uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
         with:
-          fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
+          distribution: corretto
+          java-version: 24
 
-      - name: Determine version
-        id: version
-        run: |
-          VERSION_INPUT="${{ github.event.inputs.version }}"
-          LATEST_TAG=$(git tag --list 'v*' --sort=-v:refname | head -n1)
+      - name: Build App (Maven)
+        run: mvn -B clean package
 
-          if [ -n "$VERSION_INPUT" ]; then
-            NEW_VERSION="$VERSION_INPUT"
-            IS_FIRST="false"
-          elif [ -z "$LATEST_TAG" ]; then
-            NEW_VERSION="v1.0.0"
-            IS_FIRST="true"
-          else
-            IFS='.' read -r major minor patch <<< "${LATEST_TAG#v}"
-            patch=$((patch + 1))
-            NEW_VERSION="v${major}.${minor}.${patch}"
-            IS_FIRST="false"
-          fi
-
-          echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
-          echo "is_first=$IS_FIRST" >> $GITHUB_OUTPUT
-          echo "latest_tag=$LATEST_TAG" >> $GITHUB_OUTPUT
-
-      - name: Build Changelog
-        id: build_changelog
-        uses: mikepenz/release-changelog-builder-action@v6
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          fromTag: ${{ steps.version.outputs.latest_tag }}
-          toTag: ${{ steps.version.outputs.version }}
-          configuration: ".chglog/changelog-config.json"
-
-      - name: Update CHANGELOG.md
-        run: |
-          VERSION="${{ steps.version.outputs.version }}"
-          DATE=$(date +'%Y-%m-%d')
-
-          # Prepend or create CHANGELOG.md
-          if [ ! -f CHANGELOG.md ]; then
-            echo "# Changelog" > CHANGELOG.md
-          fi
-
-          # Build the version header
-          REPO="${{ github.repository }}"
-          LATEST="${{ steps.version.outputs.latest_tag }}"
-          HEADER="## [$VERSION](https://github.com/$REPO/compare/$LATEST...$VERSION) ($DATE)"
-
-          # Combine header + changelog + old content
-          {
-            echo ""
-            echo "$HEADER"
-            echo ""
-            echo "${{ steps.build_changelog.outputs.changelog }}"
-            echo ""
-            cat CHANGELOG.md
-          } > CHANGELOG.tmp
-          mv CHANGELOG.tmp CHANGELOG.md
-
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
-          git add CHANGELOG.md
-          git commit -m "chore: update CHANGELOG for $VERSION" || echo "No changes to commit"
-          git push origin main
-
-      - name: Create Tag
-        run: |
-          git tag ${{ steps.version.outputs.version }}
-          git push origin ${{ steps.version.outputs.version }}
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-
-      - name: Set up Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Log in to Harbor
+      - name: Docker Login to Harbor
         uses: docker/login-action@v3
         with:
           registry: ${{ secrets.HARBOR_REGISTRY_URL }}
           username: ${{ secrets.HARBOR_ROBOT_NAME }}
           password: ${{ secrets.HARBOR_ROBOT_SECRET }}
 
-      - name: Set up JDK 24
-        uses: actions/setup-java@v4
-        with:
-          distribution: corretto
-          java-version: 24
-          cache: maven
+      - name: Build Docker Image
+        run: |
+          docker build \
+            -t ${{ secrets.HARBOR_REGISTRY_URL }}/aaa/service-a:${{ needs.release.outputs.tag_name }} \
+            -t ${{ secrets.HARBOR_REGISTRY_URL }}/aaa/service-a:latest \
+            .
 
-      - name: Build JAR
-        run: mvn clean package -DskipTests
-
-      - name: Build and Push Docker Image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          push: true
-          tags: |
-            ${{ secrets.HARBOR_REGISTRY_URL }}/aaa/service-a:${{ steps.version.outputs.version }}
-            ${{ secrets.HARBOR_REGISTRY_URL }}/aaa/service-a:latest
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ steps.version.outputs.version }}
-          name: Release ${{ steps.version.outputs.version }}
-          body: ${{ steps.build_changelog.outputs.changelog }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Push Docker Image to Harbor
+        run: |
+          docker push ${{ secrets.HARBOR_REGISTRY_URL }}/aaa/service-a:${{ needs.release.outputs.tag_name }}
+          docker push ${{ secrets.HARBOR_REGISTRY_URL }}/aaa/service-a:latest
