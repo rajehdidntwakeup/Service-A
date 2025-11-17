@@ -2,12 +2,20 @@
   "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
   "packages": {
     ".": {
-      "release-type": "java",
+      "release-type": "simple",
       "package-name": "main",
       "version-file": "pom.xml",
       "changelog-path": "CHANGELOG.md",
       "include-component-in-tag": false,
       "include-v-in-tag": true,
+      "extra-files": [
+        {
+          "type": "xml",
+          "path": "pom.xml",
+          "tag-name": "version",
+          "xpath": "/project/version"
+        }
+      ],
       "pull-request-title-pattern": "chore(release): release ${version}",
       "pull-request-header": "This PR prepares the next release by updating versions and changelog entries following conventional commits. Please review and merge to publish the release.",
       "label": "release",
