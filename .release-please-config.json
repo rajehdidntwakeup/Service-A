@@ -4,6 +4,7 @@
     ".": {
       "release-type": "java",
       "package-name": "main",
+      "version-file": "pom.xml",
       "changelog-path": "CHANGELOG.md",
       "include-component-in-tag": false,
       "include-v-in-tag": true,
