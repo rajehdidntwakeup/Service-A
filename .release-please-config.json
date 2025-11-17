@@ -5,14 +5,7 @@
       "release-type": "java",
       "package-name": "main",
       "include-component-in-tag": false,
-      "changelog-path": "CHANGELOG.md",
-      "extra-files": [
-        {
-          "type": "xml",
-          "path": "pom.xml",
-          "xpath": "/project/version"
-        }
-      ]
+      "changelog-path": "CHANGELOG.md"
     }
   },
   "include-v-in-tag": true,
@@ -43,6 +36,13 @@
       "type": "ci",
       "section": "Continuous Integration",
       "hidden": true
+    }
+  ],
+  "extra-files": [
+    {
+      "type": "xml",
+      "path": "pom.xml",
+      "xpath": "/project/version"
     }
   ]
 }
