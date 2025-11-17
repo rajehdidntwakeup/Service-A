@@ -5,6 +5,7 @@
       "release-type": "java",
       "package-name": "main",
       "changelog-path": "CHANGELOG.md",
+      "include-component-in-tag": false,
       "include-v-in-tag": true,
       "pull-request-title-pattern": "chore(release): release ${version}",
       "pull-request-header": "This PR prepares the next release by updating versions and changelog entries following conventional commits. Please review and merge to publish the release.",
