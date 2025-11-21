@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -23,19 +25,26 @@ import test.servicea.service.converter.ConversionProperties;
 @Service
 public class ItemServiceImpl implements ItemService {
 
+  private static final Logger LOG = LoggerFactory.getLogger(ItemServiceImpl.class);
+
   private final ItemRepository itemRepository;
   private final ConversionProperties properties;
   private final RestTemplate restTemplate;
+  
+
 
   /**
-   * Constructs an ItemServiceImpl with the provided repository.
+   * Constructs an instance of ItemServiceImpl with the specified dependencies.
    *
-   * @param itemRepository the repository used to access and persist items
+   * @param itemRepository     the repository used for item-related database operations
+   * @param properties         the properties used for external service configurations
+   * @param templateBuilder the builder used to create RestTemplate instances for HTTP requests
    */
-  public ItemServiceImpl(ItemRepository itemRepository, ConversionProperties properties, RestTemplateBuilder restTemplateBuilder) {
+  public ItemServiceImpl(ItemRepository itemRepository, ConversionProperties properties,
+                         RestTemplateBuilder templateBuilder) {
     this.itemRepository = itemRepository;
     this.properties = properties;
-    this.restTemplate = restTemplateBuilder.build();
+    this.restTemplate = templateBuilder.build();
   }
 
   @Override
@@ -124,8 +133,9 @@ public class ItemServiceImpl implements ItemService {
           externalItems.addAll(List.of(response));
         }
       } catch (Exception e) {
-        // Optional: log and continue
-        System.err.println("Failed to call " + externalService.getName() + " at " + url);
+        if (LOG.isWarnEnabled()) {
+          LOG.warn("Failed to call {} at {}", externalService.getName(), url, e);
+        }
       }
     }
     return externalItems;

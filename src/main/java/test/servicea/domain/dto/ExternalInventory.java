@@ -29,6 +29,7 @@ public class ExternalInventory {
   public String getName() {
     return name;
   }
+
   /**
    * Sets the name of the external inventory system.
    *
@@ -37,6 +38,7 @@ public class ExternalInventory {
   public void setName(String name) {
     this.name = name;
   }
+
   /**
    * Retrieves the URL of the external inventory system.
    *
@@ -45,6 +47,7 @@ public class ExternalInventory {
   public String getUrl() {
     return url;
   }
+
   /**
    * Sets the URL of the external inventory system.
    *

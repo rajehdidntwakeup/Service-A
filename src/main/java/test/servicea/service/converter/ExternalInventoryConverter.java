@@ -29,6 +29,9 @@ import test.servicea.domain.dto.ExternalInventory;
 @ConfigurationPropertiesBinding
 public class ExternalInventoryConverter implements Converter<String, ExternalInventory> {
 
+  private static final String DELIMITER = ",";
+  private static final int EXPECTED_PARTS = 2;
+
   /**
    * Converts a given String in the format "name,url" into an instance of {@link ExternalInventory}.
    * The method splits the input String by a comma (,) delimiter and assigns the resulting
@@ -43,8 +46,8 @@ public class ExternalInventoryConverter implements Converter<String, ExternalInv
    */
   @Override
   public ExternalInventory convert(String source) {
-    String[] data = source.split(",");
-    if (data.length == 2) {
+    String[] data = source.split(DELIMITER);
+    if (data.length == EXPECTED_PARTS) {
       return new ExternalInventory(data[0], data[1]);
     }
     throw new IllegalArgumentException("Invalid external service format: " + source);
