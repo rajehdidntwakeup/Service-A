@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.1.0](https://github.com/rajehdidntwakeup/Service-A/compare/v1.0.0...v1.1.0) (2025-11-21)
+
+
+### Features
+
+* finalize service-A 1.0.1 version and introduce multi-catalog service tests ([#72](https://github.com/rajehdidntwakeup/Service-A/issues/72)) ([6f7d115](https://github.com/rajehdidntwakeup/Service-A/commit/6f7d115ed7224f0eec44f759980a874350a44c8f))
+
+
+### Miscellaneous Chores
+
+* **main:** release 1.0.1-SNAPSHOT ([#69](https://github.com/rajehdidntwakeup/Service-A/issues/69)) ([8037cdd](https://github.com/rajehdidntwakeup/Service-A/commit/8037cdd7fa6b18219bb71ff447c0c68be31c2272))
+
 ## 1.0.0 (2025-11-17)
 
 
