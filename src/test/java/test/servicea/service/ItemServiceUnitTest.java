@@ -5,6 +5,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.web.server.ResponseStatusException;
 import test.servicea.domain.Item;
 import test.servicea.domain.dto.ItemDto;
@@ -26,6 +27,9 @@ public class ItemServiceUnitTest {
 
   @InjectMocks
   private ItemServiceImpl itemService;
+
+  @Mock
+  private RestTemplateBuilder restTemplateBuilder;
 
   @Test
   void createItem_callsSaveAndReturnsItem() {

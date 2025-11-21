@@ -89,6 +89,57 @@ public class ItemControllerUnitTest {
     verify(itemService).getAllItems(false);
   }
 
+  // ------------------ Tests for getAll with multi-catalog=true ------------------
+
+  @Test
+  void getAllItems_multiCatalogTrue_returnsList() {
+    Item p1 = new Item("A1", 5, 11.0, "a1");
+    Item p2 = new Item("B1", 6, 21.0, "b1");
+    List<Item> list = Arrays.asList(p1, p2);
+
+    when(itemService.getAllItems(true)).thenReturn(list);
+
+    ResponseEntity<List<Item>> response = controller.getAll(true);
+
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertEquals(2, response.getBody().size());
+    assertEquals(list, response.getBody());
+    verify(itemService).getAllItems(true);
+  }
+
+  @Test
+  void getAllItems_multiCatalogTrue_empty_returnsOkEmpty() {
+    when(itemService.getAllItems(true)).thenReturn(Collections.emptyList());
+
+    ResponseEntity<List<Item>> response = controller.getAll(true);
+
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertTrue(response.getBody().isEmpty());
+    verify(itemService).getAllItems(true);
+  }
+
+  @Test
+  void getAllItems_multiCatalogTrue_serviceThrows_propagatesException() {
+    when(itemService.getAllItems(true)).thenThrow(new RuntimeException("service boom"));
+
+    RuntimeException ex = assertThrows(RuntimeException.class, () -> controller.getAll(true));
+    assertEquals("service boom", ex.getMessage());
+    verify(itemService).getAllItems(true);
+  }
+
+  @Test
+  void getAllItems_multiCatalogTrue_serviceReturnsNull_returnsOkWithNullBody() {
+    when(itemService.getAllItems(true)).thenReturn(null);
+
+    ResponseEntity<List<Item>> response = controller.getAll(true);
+
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNull(response.getBody());
+    verify(itemService).getAllItems(true);
+  }
+
   @Test
   void getAllItems_empty_returnsOkEmpty() {
     when(itemService.getAllItems(false)).thenReturn(Collections.emptyList());

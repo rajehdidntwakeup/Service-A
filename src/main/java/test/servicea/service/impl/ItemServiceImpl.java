@@ -1,15 +1,23 @@
 package test.servicea.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 import test.servicea.domain.Item;
+import test.servicea.domain.dto.ExternalInventory;
 import test.servicea.domain.dto.ItemDto;
 import test.servicea.repository.ItemRepository;
 import test.servicea.service.ItemService;
+import test.servicea.service.converter.ConversionProperties;
 
 /**
  * Implementation of ItemService.
@@ -17,15 +25,26 @@ import test.servicea.service.ItemService;
 @Service
 public class ItemServiceImpl implements ItemService {
 
+  private static final Logger LOG = LoggerFactory.getLogger(ItemServiceImpl.class);
+
   private final ItemRepository itemRepository;
+  private final ConversionProperties properties;
+  private final RestTemplate restTemplate;
+  
+
 
   /**
-   * Constructs an ItemServiceImpl with the provided repository.
+   * Constructs an instance of ItemServiceImpl with the specified dependencies.
    *
-   * @param itemRepository the repository used to access and persist items
+   * @param itemRepository     the repository used for item-related database operations
+   * @param properties         the properties used for external service configurations
+   * @param templateBuilder the builder used to create RestTemplate instances for HTTP requests
    */
-  public ItemServiceImpl(ItemRepository itemRepository) {
+  public ItemServiceImpl(ItemRepository itemRepository, ConversionProperties properties,
+                         RestTemplateBuilder templateBuilder) {
     this.itemRepository = itemRepository;
+    this.properties = properties;
+    this.restTemplate = templateBuilder.build();
   }
 
   @Override
@@ -41,12 +60,15 @@ public class ItemServiceImpl implements ItemService {
 
   @Override
   public List<Item> getAllItems(boolean multiCatalog) {
-    // the multiCatalog parameter is ignored in this implementation
+    List<Item> allItems = new ArrayList<>();
     List<Item> items = itemRepository.findAll();
     if (!items.isEmpty()) {
-      return items;
+      allItems.addAll(items);
     }
-    return List.of();
+    if (multiCatalog) {
+      allItems.addAll(callExternalServices());
+    }
+    return allItems;
   }
 
   @Override
@@ -87,5 +109,35 @@ public class ItemServiceImpl implements ItemService {
       return item;
     }
     return null;
+  }
+
+
+  /**
+   * Fetches items from all configured external inventory services.
+   * Iterates through the external inventory configurations, makes HTTP GET requests
+   * to retrieve items from each external service endpoint, and aggregates the results.
+   * If an error occurs during a request, it is handled and the process continues with other services.
+   *
+   * @return a list of items retrieved from external inventory services. If no items are retrieved
+   *         or if there are no configured external services, the list will be empty.
+   */
+  private List<Item> callExternalServices() {
+    List<Item> externalItems = new ArrayList<>();
+    for (Map.Entry<String, ExternalInventory> entry : properties.getExternalInventory().entrySet()) {
+      ExternalInventory externalService = entry.getValue();
+      String url = externalService.getUrl();
+
+      try {
+        Item[] response = restTemplate.getForObject(url, Item[].class);
+        if (response != null) {
+          externalItems.addAll(List.of(response));
+        }
+      } catch (Exception e) {
+        if (LOG.isWarnEnabled()) {
+          LOG.warn("Failed to call {} at {}", externalService.getName(), url, e);
+        }
+      }
+    }
+    return externalItems;
   }
 }
