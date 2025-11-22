@@ -1,301 +1,371 @@
-# Service-A - Picture Inventory Management System
+# Inventory Service – Webshop Backend
 
-A modern Spring Boot microservice for managing picture inventories with REST API.
+[![Java](https://img.shields.io/badge/Java-24-blue.svg)](https://www.oracle.com/java/)
+[![Maven](https://img.shields.io/badge/Maven-3.9+-blue.svg)](https://maven.apache.org/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.6-brightgreen)](https://spring.io/projects/spring-boot)
 
-## Overview
+## Project Overview
 
-Service-A is a microservice that provides a complete CRUD API for managing picture inventories. The system enables
-creating, retrieving, updating, and managing pictures with details such as name, stock, price, and description.
-
-## Technology Stack
-
-- **Java 24** - Latest Java version
-- **Spring Boot 3.5.5** - Microservices framework
-- **Spring Data JPA** - Data persistence
-- **Spring Security** - Authentication and authorization
-- **Spring WebFlux** - Reactive programming
-- **H2 Database** - In-memory database for development
-- **PostgreSQL** - Production database
-- **Maven** - Build management
-- **JUnit 5** - Testing framework
-- **MockMvc** - Web layer testing
-
-## Architecture
+### Architecture
 
 The project follows a clean layered architecture:
 
 ```
 ├── Controller Layer    - REST API endpoints
-├── Service Layer      - Business logic
-├── Repository Layer   - Data access
-└── Domain Layer       - Entities and DTOs
+├── Service Layer       - Business logic
+├── Repository Layer    - Data access
+└── Domain Layer        - Entities and DTOs
 ```
 
-## Project Structure
+The **Inventory Service** is a core backend component of a webshop system.  
+It manages and provides details for all products available in the store, including:
 
-```
-src/
-├── main/java/test/servicea/
-│   ├── config/           # Configuration classes
-│   ├── controller/       # REST controllers
-│   ├── domain/          # Entities and DTOs
-│   ├── repository/      # Data access
-│   ├── service/         # Business logic
-│   └── ServiceAApplication.java
-├── main/resources/
-│   └── application.properties
-└── test/
-    ├── java/            # Test classes
-    └── resources/
-        └── application-test.properties
-```
+- **ID** – Unique identifier for each product
+- **Name** – Product name
+- **Stock** – Current inventory quantity
+- **Price** – Unit price of the product
+- **Description** – Textual description of the product
 
-## Installation and Setup
+### Inventory ER Diagram
+
+![Inventory ER diagram](docs/InventoryER.png)
+
+The service is built with **Java 24** and **Maven**, following a modular, RESTful design.  
+It can be integrated into a larger microservice-based webshop architecture or used as a standalone component.
+
+---
+
+## Usage
 
 ### Prerequisites
 
-- Java 24 or higher
-- Maven 3.6 or higher
-- PostgreSQL (for production)
+- Java 24 or later
+- Maven 3.9+
 
-### Local Development
+### Running the Application
 
-1. **Clone the repository:**
-   ```bash
-   git clone <repository-url>
-   cd service-A
-   ```
+1. Clone the repository:
+    ```bash
+    git clone https://github.com/fhburgenland-bswe/swm2-ws2025-group-a-inventory.git
 
-2. **Install dependencies:**
-   ```bash
-   mvn clean install
-   ```
+2. Build the Project:
+    ```bash
+    mvn clean package
 
-3. **Start the application:**
-   ```bash
-   mvn spring-boot:run
-   ```
+3. Run generated JAR file:
+    ```bash
+   java -jar target/inventory-service-0.0.1-SNAPSHOT.jar
 
-4. **Test the application:**
-    - API is available at: `http://localhost:8080`
-    - H2 Console: `http://localhost:8080/h2-console`
-    - JDBC URL: `jdbc:h2:mem:testdb-service-A`
-    - Username: `sa`
-    - Password: (empty)
+4. Access the API:
+   http://localhost:8080/api/inventory
 
-## API Documentation
+5. Endpoint:
 
-### Base URL
+| Method | Endpoint                              | Description                |
+|--------|---------------------------------------|----------------------------|
+| `POST` | `/api/inventory`                      | Create new item            |
+| `GET`  | `/api/inventory`                      | Get all items              |
+| `GET`  | `/api/inventory/{id}`                 | Get item by ID             |
+| `PUT`  | `/api/inventory/{id}`                 | Update item by ID          |
+| `GET`  | `/api/inventory/{id}/itemname/{name}` | Get item by ID and name    |
+| `PUT`  | `/api/inventory/{id}/itemname/{name}` | Update item by ID and name |
 
-```
-http://localhost:8080/api/inventory
-```
+## Code Style: Checkstyle
 
-### Endpoints
+This project uses Checkstyle to enforce a consistent Java coding style.
 
-| Method | Endpoint              | Description        |
-|--------|-----------------------|--------------------|
-| `POST` | `/api/inventory`      | Create new picture |
-| `GET`  | `/api/inventory`      | Get all pictures   |
-| `GET`  | `/api/inventory/{id}` | Get picture by ID  |
-| `PUT`  | `/api/inventory/{id}` | Update picture     |
+- Configuration: config/checkstyle/checkstyle.xml (with suppressions in config/checkstyle/checkstyle-suppressions.xml)
+- Maven plugin: org.apache.maven.plugins:maven-checkstyle-plugin (configured in pom.xml)
+- Fails the build on violations (default behavior in this repo)
 
-### Example Requests
+How to run locally:
 
-#### Create Picture
+- Quick check: mvn -B checkstyle:check
+- Full validation: mvn -B clean verify
 
-```bash
-curl -X POST http://localhost:8080/api/inventory \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "Mona Lisa",
-    "stock": 1,
-    "price": 100.0,
-    "description": "Famous painting by Leonardo da Vinci"
-  }'
-```
-
-#### Get All Pictures
-
-```bash
-curl -X GET http://localhost:8080/api/inventory
-```
-
-#### Get Picture by ID
-
-```bash
-curl -X GET http://localhost:8080/api/inventory/1
-```
-
-#### Update Picture
-
-```bash
-curl -X PUT http://localhost:8080/api/inventory/1 \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "Mona Lisa - Updated",
-    "stock": 2,
-    "price": 150.0,
-    "description": "Updated description"
-  }'
-```
-
-### Data Model
-
-#### Picture Entity
-
-```json
-{
-  "id": 1,
-  "name": "Picture Name",
-  "stock": 10,
-  "price": 99.99,
-  "description": "Picture description"
-}
-```
-
-#### PictureDto
-
-```json
-{
-  "name": "Picture Name",
-  "stock": 10,
-  "price": 99.99,
-  "description": "Picture description"
-}
-```
-
-### Validation Rules
-
-- **name**: Required field, cannot be empty
-- **stock**: Must be >= 0
-- **price**: Must be >= 0
-- **description**: Required field, cannot be empty
-
-## Testing
-
-### Running Tests
-
-```bash
-# All tests
-mvn test
-
-# Unit tests only
-mvn test -Dtest="*UnitTest"
-
-# Integration tests only
-mvn test -Dtest="*IntegrationTest"
-```
-
-### Test Coverage
-
-The project contains comprehensive tests:
-
-- **Unit Tests** for Controller and Service layers
-- **Integration Tests** with MockMvc
-- **Edge Cases** and error handling
-- **Validation tests**
-
-## Code Quality
-
-The project uses several code quality tools:
-
-### Checkstyle
-
-```bash
+``` bash
 mvn checkstyle:check
 ```
 
-### PMD
+Reports:
 
-```bash
+- HTML report: target/reports/checkstyle.html
+- XML report: target/checkstyle-result.xml
+
+Continuous Integration:
+
+- Checkstyle runs in CI for every pull request. See .github/workflows/verify.yml
+
+## Code Style: PMD
+
+This project integrates PMD (Programming Mistake Detector)
+to identify common programming issues and enforce best practices automatically during continuous integration.
+
+- Configuration: config/pmd/ruleset.xml (customized ruleset for this project)
+- Maven plugin: org.apache.maven.plugins:maven-pmd-plugin (configured in pom.xml)
+- Fails the build on rule violations — no code with PMD errors can be merged.
+
+How to run locally:
+
+- Quick check: mvn -B pmd:check
+- Full validation: mvn -B clean verify
+
+``` bash
 mvn pmd:check
 ```
 
-### SpotBugs
+Reports:
+
+- XML report: target/pmd.xml
+
+Continuous Integration:
+
+- PMD runs automatically in GitHub Actions as part of the verify.yml workflow.
+- Uses Java 24 (Amazon Corretto) runtime.
+- Runs before the build job — if PMD fails, the build is skipped.
+- Ensures consistent code quality and prevents merging of code with PMD violations.
+
+## SpotBugs Integration in CI/CD
+
+SpotBugs is integrated into the GitHub Actions CI/CD workflow to ensure all code meets quality and reliability standards
+before being merged into main.
+
+Workflow Details
+
+The SpotBugs job runs automatically as part of the pipeline defined in .github/workflows/verify.yml.
+
+It uses Amazon Corretto 24 to analyze the Java source code for potential bugs and bad practices.
+
+The build job depends on the successful completion of the SpotBugs analysis — if SpotBugs fails, the pipeline will not
+continue.
+
+Running SpotBugs Locally
+
+You can also run SpotBugs manually to analyze your code before committing changes:
 
 ```bash
 mvn spotbugs:check
 ```
 
-## Deployment
+### Clean and compile the project
 
-### Docker (Recommended)
-
-```dockerfile
-FROM openjdk:24-jdk-slim
-COPY target/service-A-0.0.1-SNAPSHOT.jar app.jar
-EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "/app.jar"]
+```bash
+mvn clean compile
 ```
 
-### Production Configuration
+### Run SpotBugs analysis
+
+mvn spotbugs:spotbugs
+
+Reports are generated in:
+
+target/spotbugsXml.xml — XML report format
+
+target/spotbugs/
+
+Depending on your configuration, you may find:
+
+spotbugs.sarif — machine-readable format used by GitHub for annotations
+
+## Dockerfile Linting with Hadolint
+
+This project includes a Hadolint job in the CI/CD pipeline to ensure that the Dockerfile follows best practices and
+coding standards.
+
+### Workflow Details:
+
+1. **Checks if a `Dockerfile` exists**:
+    - Skips Hadolint if absent.
+
+2. **Hadolint Execution**:
+    - Uses the `hadolint/hadolint-action@v3.1.0` and scans the `Dockerfile`.
+    - Ignores certain linting rules (e.g., `DL3008`, `DL3013`).
+
+3. **Manual Installation**:
+    - Hadolint is installed directly on the runner for additional checks:
+      ```bash
+      wget -O /usr/local/bin/hadolint https://github.com/hadolint/hadolint/releases/latest/download/hadolint-Linux-x86_64
+      chmod +x /usr/local/bin/hadolint
+      ```
+
+4. **Failure Handling**:
+   Warnings are ignored, but errors cause the pipeline to fail:
+    ```bash
+    hadolint Dockerfile --failure-threshold error
+    ```
+
+### Run Locally:
+
+If you want to verify your `Dockerfile` locally with Hadolint:
+
+1. Install Hadolint:
+    ```bash
+    wget -O /usr/local/bin/hadolint https://github.com/hadolint/hadolint/releases/latest/download/hadolint-Linux-x86_64
+    chmod +x /usr/local/bin/hadolint
+    ```
+2. Run linting:
+    ```bash
+    hadolint Dockerfile
+    ```
+
+Hadolint ensures that Docker images are built following best practices to optimize size, security, and build speed.
+
+## Container Build \& Push (CI)
+
+This project builds and pushes Docker images in CI only if the Dockerfile linting check (`hadolint`) completed
+successfully.
+The related job in `verify.yml` is named `container-build` and has `needs: hadolint`, so only lint-checked Dockerfiles
+are used for image builds.
+
+### Purpose
+
+- Ensure only lint-verified Dockerfiles are used for images (security \& quality).
+- Automatically build the JAR, build the image, tag it, and push it to the registry.
+
+### CI Flow
+
+1. Build the JAR with Maven: `mvn clean package -DskipTests`
+2. CI logs into the container registry (authentication via Secrets).
+3. The Docker image is built and tagged with two tags:
+    - Commit SHA: `${{ github.sha }}`
+4. Both tags are pushed to the registry.
+5. The pipeline outputs the registry URL with the Commit SHA to confirm availability.
+
+### Required GitHub Secrets
+
+- `HARBOR_REGISTRY_URL` — target registry URL (e.g. `registry.example.com/project/name`)
+- `HARBOR_ROBOT_NAME` — username / robot for login
+- `HARBOR_ROBOT_SECRET` — password / secret for login
+
+### Local testing
+
+   ```bash
+   mvn clean package -DskipTests
+
+   docker login <registry> -u <user> -p <password>
+   docker build -t <registry>:latest -t <registry>:<commit-sha> .
+   docker push <registry>:<commit-sha>
+   ```
+
+## Production Configuration
 
 Configure PostgreSQL for production:
 
 ```properties
-spring.datasource.url=jdbc:postgresql://localhost:5432/servicea_db
+spring.datasource.url=${DB_URL}
 spring.datasource.username=${DB_USERNAME}
 spring.datasource.password=${DB_PASSWORD}
 spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
 ```
 
-## Configuration
+### Security Configuration
 
-### Environment Variables
+This project uses Spring Security to configure the application's HTTP security and CORS policies.
+The `SecurityConfig` class is responsible for defining these configurations.
+
+#### Key Features:
+
+1. **HTTP Security**:
+    - CSRF protection is disabled to simplify API interactions.
+    - CORS (Cross-Origin Resource Sharing) is enabled to allow communication from multiple origins.
+    - Specific requests are explicitly permitted:
+        - /api/inventory/** (API endpoints for inventory services)
+        - /h2-console/** (for development environments using the H2 database console—enabled with same-origin frame
+          settings).
+2. **Custom CORS Configurations**:
+    - All origins (`*`) are allowed.
+    - Allowed `HTTP` methods: `GET`, `POST`, `PUT`.
+    - All headers are allowed, and certain headers are exposed (`Authorization`, `Link`).
+    - Credentials are supported for cross-origin requests.
+    - Preflight request max age set to 3600 seconds.
+
+#### Configuration Beans:
+
+- `SecurityFilterChain`: Defines the security filter chain for handling HTTP requests.
+- `CorsConfigurationSource`: Provides the CORS configuration for the application.
+
+This configuration ensures that the application is secure while allowing flexibility for frontend clients and external
+systems to interact with the API seamlessly.
+
+#### Development Notes:
+
+- The `SecurityConfig` class includes settings for enabling the H2 console UI by allowing its frames (`same-origin`
+  policy).
+- You can modify or extend the security rules as needed by changing the `authorizeHttpRequests` section.
+
+### Configuration
+
+#### Environment Variables
 
 - `DB_USERNAME` - Database username
 - `DB_PASSWORD` - Database password
 - `DB_URL` - Database URL
 
-### Application Profiles
+## Local & testing Configuration
 
-- `dev` - Development (H2 Database)
-- `test` - Testing (H2 In-Memory)
-- `prod` - Production (PostgreSQL)
+Configure H2 for local & testing:
 
-## Contributing
+Local run (Windows — PowerShell)
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+```bash
+export DB_URL='jdbc:postgresql://<host>:<port>/<dbname>?sslmode=require'
+export DB_USERNAME='<user>'
+export DB_PASSWORD='<pass>'
+mvn spring-boot:run -Dspring-boot.run.profiles=prod
+```
 
-## Changelog
+Run tests (H2)
 
-### Version 0.0.1-SNAPSHOT
+```bash
+mvn -Dspring.profiles.active=test test
+```
 
-- Initial implementation
-- CRUD operations for pictures
-- REST API with validation
-- Comprehensive test coverage
-- Code quality tools integrated
+## Automated Release Management (Release Please)
 
-## Known Issues
+This project uses Release Please, a Google-maintained automation tool, to manage versioning, changelog generation,
+GitHub Releases, and automated container publishing.
 
-No known issues in the current version.
+The release workflow is fully automated and triggers whenever a pull request is merged into the `main` branch.
 
-## Roadmap
+### Automated Versioning & Tag Creation
 
-- [ ] OpenAPI/Swagger documentation
-- [ ] Docker containerization
-- [ ] Health checks and monitoring
-- [ ] Logging integration
-- [ ] API versioning
-- [ ] Caching strategies
+The release workflow determines the next version based on Conventional Commit prefixes found in merged pull requests.
 
-## Support
+Release Please creates a Git tag in the format: `v1.0.0`
 
-For questions or issues:
+### GitHub Release Creation
 
-- Create an issue in the repository
-- Contact the developers: Jeremy Heißenberger, Rajeh Abdulhadi, Felix Eibl
+- Once the release PR is merged:
+- A GitHub Release is created automatically.
+- The release notes include the generated changelog sections.
+- The version tag (e.g., `v1.0.0`) is attached.
 
-## License
+### Automated Container Build & Publish
 
-This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
+#### After tagging:
 
----
+- The Maven project is built from the release commit.
+- A Container image is generated.
+- The image is pushed to your Harbor registry using the version tag.
 
-**Developed by Jeremy Heißenberger, Rajeh Abdulhadi, and Felix Eibl**
+This guarantees each release is paired with a reproducible, versioned container image.
+
+### Automatic CHANGELOG.md Generation
+
+Release Please updates CHANGELOG.md using our custom configuration:
+
+| Commit Prefix | Changelog Section      | Visible    |
+|---------------|------------------------|------------|
+| `feat:`       | Feature                | ✔️         |
+| `fix:`        | Bug Fixes              | ✔️         |
+| `chore:`      | Miscellaneous Chores   | ✔️         |
+| `docs:`       | Documentation          | ❌ (hidden) |
+| `ci:`         | Continuous Integration | ❌ (hidden) |
+
+Only visible sections appear in the published changelog.
+
+## LICENSE
+
+This repository is licensed under the MIT License. See the [LICENSE](LICENSE) file for more information.
+Only the specification files are licensed under the MIT License and not the services or their code!
+
