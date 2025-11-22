@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.1.1](https://github.com/rajehdidntwakeup/Service-A/compare/v1.1.0...v1.1.1) (2025-11-22)
+
+
+### Miscellaneous Chores
+
+* add workflow_dispatch trigger to verification workflow ([#78](https://github.com/rajehdidntwakeup/Service-A/issues/78)) ([73bbb3a](https://github.com/rajehdidntwakeup/Service-A/commit/73bbb3a793769a5c9cda44eb18f98d339ed5f9b3))
+* remove unnecessary newline from verify workflow ([#80](https://github.com/rajehdidntwakeup/Service-A/issues/80)) ([77225fd](https://github.com/rajehdidntwakeup/Service-A/commit/77225fd2b2181bffa40518f481740f0bd170dfed))
+* update verify workflow to trigger on pull request events ([6a9eab4](https://github.com/rajehdidntwakeup/Service-A/commit/6a9eab4c6ae80fb0e4258384de269a325f4935b6))
+* update verify workflow trigger to run on push to main ([#79](https://github.com/rajehdidntwakeup/Service-A/issues/79)) ([680f32f](https://github.com/rajehdidntwakeup/Service-A/commit/680f32f5d5e525b66caa01f4174fd739326041ce))
+* update workflow to use pull_request_target for main branch verification ([#76](https://github.com/rajehdidntwakeup/Service-A/issues/76)) ([8bf2443](https://github.com/rajehdidntwakeup/Service-A/commit/8bf244335a69ce24b447e903cdbf65931a9f62d0))
+
 ## [1.1.0](https://github.com/rajehdidntwakeup/Service-A/compare/v1.0.0...v1.1.0) (2025-11-21)
 
 
