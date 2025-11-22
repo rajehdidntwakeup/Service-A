@@ -2,11 +2,11 @@ name: Verify
 
 on:
   pull_request:
-    types: [opened, reopened, synchronize]
     branches:
       - main
 
   workflow_dispatch:
+
 
 
 permissions:
