@@ -1,3 +1,6 @@
+
+
+
 # Inventory Service – Webshop Backend
 
 [![Java](https://img.shields.io/badge/Java-24-blue.svg)](https://www.oracle.com/java/)
@@ -17,6 +20,7 @@ The project follows a clean layered architecture:
 └── Domain Layer        - Entities and DTOs
 ```
 
+
 The **Inventory Service** is a core backend component of a webshop system.  
 It manages and provides details for all products available in the store, including:
 
@@ -27,7 +31,6 @@ It manages and provides details for all products available in the store, includi
 - **Description** – Textual description of the product
 
 ### Inventory ER Diagram
-
 ![Inventory ER diagram](docs/InventoryER.png)
 
 The service is built with **Java 24** and **Maven**, following a modular, RESTful design.  
@@ -38,9 +41,9 @@ It can be integrated into a larger microservice-based webshop architecture or us
 ## Usage
 
 ### Prerequisites
-
 - Java 24 or later
 - Maven 3.9+
+
 
 ### Running the Application
 
@@ -70,6 +73,85 @@ It can be integrated into a larger microservice-based webshop architecture or us
 | `GET`  | `/api/inventory/{id}/itemname/{name}` | Get item by ID and name    |
 | `PUT`  | `/api/inventory/{id}/itemname/{name}` | Update item by ID and name |
 
+
+
+## Multi-catalog
+
+The service can aggregate items from multiple external catalogs in addition to its own database.
+
+### How it works
+- By default, `GET /api/inventory` returns items from this service's database only.
+- If you pass the query parameter `multi-catalog=true`, the service will also call all configured external inventory services and merge their items with the local results.
+- External call failures are logged as warnings and are skipped; remaining sources are still processed.
+
+Endpoint examples:
+- Local only: `GET http://localhost:8080/api/inventory`
+- Aggregate from all configured catalogs: `GET http://localhost:8080/api/inventory?multi-catalog=true`
+
+Example with curl:
+```bash
+curl -s "http://localhost:8080/api/inventory?multi-catalog=true"
+```
+
+### Configure external catalogs
+External catalogs are defined via Spring configuration properties. This project supports a flexible map of catalogs.
+
+1) In `src/main/resources/application.properties`, the keys are structured as:
+```
+external.inventory.externalInventory.<key>=<NAME>,<URL>
+```
+Where `<key>` is any identifier you choose (e.g., `a`, `b`, `partner1`). The value is a comma-separated pair of the display name and the base URL to fetch items.
+
+This project ships with environment-backed defaults like:
+```properties
+# application.properties
+external.inventory.externalInventory.b=${EXTERNAL_SERVICE_NAME_1},${EXTERNAL_SERVICE_URL_1}
+external.inventory.externalInventory.c=${EXTERNAL_SERVICE_NAME_2},${EXTERNAL_SERVICE_URL_2}
+```
+
+2) Provide the environment variables (e.g., in a local `.env` file or your deployment environment):
+```dotenv
+# .env (example)
+EXTERNAL_SERVICE_NAME_1=Warehouse EU
+EXTERNAL_SERVICE_URL_1=http://localhost:9090/api/inventory
+
+EXTERNAL_SERVICE_NAME_2=Warehouse US
+EXTERNAL_SERVICE_URL_2=https://partner.example.com/inventory
+```
+
+Notes:
+- Each external service must expose an endpoint returning a JSON array compatible with this service's `Item` model.
+- Typical URL is the partner's equivalent of `/api/inventory` that returns a list of items.
+- You can add as many sources as needed by adding more keys under `external.inventory.externalInventory.*`.
+
+### Data model compatibility
+The external endpoint should return an array of objects compatible with the `Item` structure used here:
+```json
+[
+  {
+    "id": 123,
+    "name": "Sample",
+    "stock": 10,
+    "price": 19.99,
+    "description": "Sample from partner"
+  }
+]
+```
+
+If fields are missing or differently named, you may need an adapter in the upstream service. This service expects an `Item[]` payload and will aggregate it as-is.
+
+### Behavior and error handling
+- Merging strategy: results from the local database are combined with all external arrays in a single list. No de-duplication is performed by default.
+- Fault tolerance: if any external call fails, the error is logged at WARN level and the process continues with the next source.
+- Performance: external calls are executed sequentially in the current implementation.
+
+### Quick checklist
+- Configure env vars or hard-code endpoints in `application.properties`.
+- Start the app.
+- Call: `GET /api/inventory?multi-catalog=true` to see aggregated items.
+
+
+
 ## Code Style: Checkstyle
 
 This project uses Checkstyle to enforce a consistent Java coding style.
@@ -79,7 +161,6 @@ This project uses Checkstyle to enforce a consistent Java coding style.
 - Fails the build on violations (default behavior in this repo)
 
 How to run locally:
-
 - Quick check: mvn -B checkstyle:check
 - Full validation: mvn -B clean verify
 
@@ -88,12 +169,10 @@ mvn checkstyle:check
 ```
 
 Reports:
-
 - HTML report: target/reports/checkstyle.html
 - XML report: target/checkstyle-result.xml
 
 Continuous Integration:
-
 - Checkstyle runs in CI for every pull request. See .github/workflows/verify.yml
 
 ## Code Style: PMD
@@ -106,7 +185,6 @@ to identify common programming issues and enforce best practices automatically d
 - Fails the build on rule violations — no code with PMD errors can be merged.
 
 How to run locally:
-
 - Quick check: mvn -B pmd:check
 - Full validation: mvn -B clean verify
 
@@ -115,11 +193,9 @@ mvn pmd:check
 ```
 
 Reports:
-
 - XML report: target/pmd.xml
 
 Continuous Integration:
-
 - PMD runs automatically in GitHub Actions as part of the verify.yml workflow.
 - Uses Java 24 (Amazon Corretto) runtime.
 - Runs before the build job — if PMD fails, the build is skipped.
@@ -169,11 +245,9 @@ spotbugs.sarif — machine-readable format used by GitHub for annotations
 
 ## Dockerfile Linting with Hadolint
 
-This project includes a Hadolint job in the CI/CD pipeline to ensure that the Dockerfile follows best practices and
-coding standards.
+This project includes a Hadolint job in the CI/CD pipeline to ensure that the Dockerfile follows best practices and coding standards.
 
 ### Workflow Details:
-
 1. **Checks if a `Dockerfile` exists**:
     - Skips Hadolint if absent.
 
@@ -195,9 +269,7 @@ coding standards.
     ```
 
 ### Run Locally:
-
 If you want to verify your `Dockerfile` locally with Hadolint:
-
 1. Install Hadolint:
     ```bash
     wget -O /usr/local/bin/hadolint https://github.com/hadolint/hadolint/releases/latest/download/hadolint-Linux-x86_64
@@ -212,18 +284,14 @@ Hadolint ensures that Docker images are built following best practices to optimi
 
 ## Container Build \& Push (CI)
 
-This project builds and pushes Docker images in CI only if the Dockerfile linting check (`hadolint`) completed
-successfully.
-The related job in `verify.yml` is named `container-build` and has `needs: hadolint`, so only lint-checked Dockerfiles
-are used for image builds.
+This project builds and pushes Docker images in CI only if the Dockerfile linting check (`hadolint`) completed successfully.
+The related job in `verify.yml` is named `container-build` and has `needs: hadolint`, so only lint-checked Dockerfiles are used for image builds.
 
 ### Purpose
-
 - Ensure only lint-verified Dockerfiles are used for images (security \& quality).
 - Automatically build the JAR, build the image, tag it, and push it to the registry.
 
 ### CI Flow
-
 1. Build the JAR with Maven: `mvn clean package -DskipTests`
 2. CI logs into the container registry (authentication via Secrets).
 3. The Docker image is built and tagged with two tags:
@@ -232,7 +300,6 @@ are used for image builds.
 5. The pipeline outputs the registry URL with the Commit SHA to confirm availability.
 
 ### Required GitHub Secrets
-
 - `HARBOR_REGISTRY_URL` — target registry URL (e.g. `registry.example.com/project/name`)
 - `HARBOR_ROBOT_NAME` — username / robot for login
 - `HARBOR_ROBOT_SECRET` — password / secret for login
@@ -246,7 +313,6 @@ are used for image builds.
    docker build -t <registry>:latest -t <registry>:<commit-sha> .
    docker push <registry>:<commit-sha>
    ```
-
 ## Production Configuration
 
 Configure PostgreSQL for production:
@@ -270,8 +336,7 @@ The `SecurityConfig` class is responsible for defining these configurations.
     - CORS (Cross-Origin Resource Sharing) is enabled to allow communication from multiple origins.
     - Specific requests are explicitly permitted:
         - /api/inventory/** (API endpoints for inventory services)
-        - /h2-console/** (for development environments using the H2 database console—enabled with same-origin frame
-          settings).
+        - /h2-console/** (for development environments using the H2 database console—enabled with same-origin frame settings).
 2. **Custom CORS Configurations**:
     - All origins (`*`) are allowed.
     - Allowed `HTTP` methods: `GET`, `POST`, `PUT`.
@@ -284,14 +349,12 @@ The `SecurityConfig` class is responsible for defining these configurations.
 - `SecurityFilterChain`: Defines the security filter chain for handling HTTP requests.
 - `CorsConfigurationSource`: Provides the CORS configuration for the application.
 
-This configuration ensures that the application is secure while allowing flexibility for frontend clients and external
-systems to interact with the API seamlessly.
+This configuration ensures that the application is secure while allowing flexibility for frontend clients and external systems to interact with the API seamlessly.
 
 #### Development Notes:
-
-- The `SecurityConfig` class includes settings for enabling the H2 console UI by allowing its frames (`same-origin`
-  policy).
+- The `SecurityConfig` class includes settings for enabling the H2 console UI by allowing its frames (`same-origin` policy).
 - You can modify or extend the security rules as needed by changing the `authorizeHttpRequests` section.
+
 
 ### Configuration
 
