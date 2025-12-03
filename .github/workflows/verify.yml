@@ -27,6 +27,15 @@ jobs:
         with:
           token: ${{ secrets.CONFORM }}
 
+  yamllint:
+    name: YAMLLint
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - run: yamllint applications
+
   checkstyle:
     runs-on: ubuntu-latest
     name: Checkstyle

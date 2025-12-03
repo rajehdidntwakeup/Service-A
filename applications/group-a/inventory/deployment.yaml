@@ -1,0 +1,55 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: inventory
+  labels:
+    app.kubernetes.io/name: inventory
+    app.kubernetes.io/instance: inventory
+    app.kubernetes.io/component: service
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: inventory
+      app.kubernetes.io/instance: inventory
+      app.kubernetes.io/component: service
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: inventory
+        app.kubernetes.io/instance: inventory
+        app.kubernetes.io/component: service
+    spec:
+      containers:
+        - name: inventory
+          image: registry.hochschule-burgenland.muehlbachler.xyz/swm2-ws2025-group-a-inventory/inventory:v1.0.0
+          ports:
+            - containerPort: 8080
+              name: http
+          env:
+            - name: DB_URL
+              value: "jdbc:postgresql://group-a-inventory-service.e.aivencloud.com:14221/defaultdb?sslmode=require"
+            - name: DB_USERNAME
+              value: "avnadmin"
+            - name: DB_PASSWORD
+              value: "AVNS_MoZkinDqzlc8rpySEwq"
+            - name: EXTERNAL_SERVICE_NAME_1
+              value: "D"
+            - name: EXTERNAL_SERVICE_NAME_2
+              value: "E"
+            - name: EXTERNAL_SERVICE_URL_1
+              value: "inventory.group-b.student.bswe.hochschule-burgenland.muehlbachler.xyz/api/inventory"
+            - name: EXTERNAL_SERVICE_URL_2
+              value: "inventory.group-c.student.bswe.hochschule-burgenland.muehlbachler.xyz/api/inventory"
+            - name: JAVA_TOOL_OPTIONS
+              value: "-Xmx256m -XX:MaxMetaspaceSize=128m -XX:ReservedCodeCacheSize=64m -XX:MaxRAMPercentage=75.0 -XX:MinRAMPercentage=50.0"
+          resources:
+            requests:
+              cpu: 100m
+              memory: 384Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+      imagePullSecrets:
+        - name: registry-credentials

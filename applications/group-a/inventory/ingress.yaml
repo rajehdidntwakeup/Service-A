@@ -1,0 +1,29 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: inventory
+  labels:
+    app.kubernetes.io/name: inventory
+    app.kubernetes.io/instance: inventory
+    app.kubernetes.io/component: service
+  annotations:
+    external-dns.alpha.kubernetes.io/provider: public
+    external-dns.alpha.kubernetes.io/target: 178.63.69.250,2a01:4f8:121:14e2:100:3:3:1
+    cert-manager.io/cluster-issuer: cluster-issuer-muehlbachler-xyz
+spec:
+  tls:
+    - hosts:
+        - inventory.group-a.student.bswe.hochschule-burgenland.muehlbachler.xyz
+      secretName: bswe-group-a-inventory-tls
+  rules:
+    - host: inventory.group-a.student.bswe.hochschule-burgenland.muehlbachler.xyz
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: inventory
+                port:
+                  number: 8080
