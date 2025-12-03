@@ -29,21 +29,45 @@ spec:
               name: http
           env:
             - name: DB_URL
-              value: "jdbc:postgresql://group-a-inventory-service.e.aivencloud.com:14221/defaultdb?sslmode=require"
+              valueFrom:
+                secretKeyRef:
+                  name: inventory-service-config
+                  key: DB_URL
             - name: DB_USERNAME
-              value: "avnadmin"
+              valueFrom:
+                secretKeyRef:
+                  name: inventory-service-config
+                  key: DB_USERNAME
             - name: DB_PASSWORD
-              value: "AVNS_MoZkinDqzlc8rpySEwq"
+              valueFrom:
+                secretKeyRef:
+                  name: inventory-service-config
+                  key: DB_PASSWORD
             - name: EXTERNAL_SERVICE_NAME_1
-              value: "D"
+              valueFrom:
+                secretKeyRef:
+                  name: inventory-service-config
+                  key: EXT_SERVICE_NAME_1
             - name: EXTERNAL_SERVICE_NAME_2
-              value: "E"
+              valueFrom:
+                secretKeyRef:
+                  name: inventory-service-config
+                  key: EXT_SERVICE_NAME_2
             - name: EXTERNAL_SERVICE_URL_1
-              value: "inventory.group-b.student.bswe.hochschule-burgenland.muehlbachler.xyz/api/inventory"
+              valueFrom:
+                secretKeyRef:
+                  name: inventory-service-config
+                  key: EXT_SERVICE_URL_1
             - name: EXTERNAL_SERVICE_URL_2
-              value: "inventory.group-c.student.bswe.hochschule-burgenland.muehlbachler.xyz/api/inventory"
+              valueFrom:
+                secretKeyRef:
+                  name: inventory-service-config
+                  key: EXT_SERVICE_URL_2
             - name: JAVA_TOOL_OPTIONS
-              value: "-Xmx256m -XX:MaxMetaspaceSize=128m -XX:ReservedCodeCacheSize=64m -XX:MaxRAMPercentage=75.0 -XX:MinRAMPercentage=50.0"
+              valueFrom:
+                secretKeyRef:
+                  name: inventory-service-config
+                  key: JAVA_TOOL_OPTIONS
           resources:
             requests:
               cpu: 100m
