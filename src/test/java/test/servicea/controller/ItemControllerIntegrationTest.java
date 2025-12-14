@@ -35,7 +35,7 @@ public class ItemControllerIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(itemDto)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.name", is("Test Item")))
+                .andExpect(jsonPath("$.name", is("Service-A: Test Item")))
                 .andExpect(jsonPath("$.stock", is(10)))
                 .andExpect(jsonPath("$.price", is(100.0)))
                 .andExpect(jsonPath("$.description", is("Test Description")));
@@ -77,7 +77,7 @@ public class ItemControllerIntegrationTest {
 
     @Test
     public void testUpdateItemById() throws Exception {
-        ItemDto itemDto = new ItemDto("Old Item", 5, 50.0, "Old Description");
+        ItemDto itemDto = new ItemDto("Service-A: Old Item", 5, 50.0, "Old Description");
 
         String response = mockMvc.perform(post("/api/inventory")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -86,13 +86,13 @@ public class ItemControllerIntegrationTest {
 
         Item createdItem = objectMapper.readValue(response, Item.class);
 
-        ItemDto updatedDto = new ItemDto("Updated Item", 20, 200.0, "Updated Description");
+        ItemDto updatedDto = new ItemDto("Service-A: Updated Item", 20, 200.0, "Updated Description");
 
         mockMvc.perform(put("/api/inventory/" + createdItem.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updatedDto)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name", is("Updated Item")))
+                .andExpect(jsonPath("$.name", is("Service-A: Updated Item")))
                 .andExpect(jsonPath("$.stock", is(20)))
                 .andExpect(jsonPath("$.price", is(200.0)))
                 .andExpect(jsonPath("$.description", is("Updated Description")));
@@ -215,7 +215,7 @@ public class ItemControllerIntegrationTest {
 
     @Test
     public void testGetItemByIdAndName_UnicodeName_Success() throws Exception {
-        String unicodeName = "Café ☕️";
+        String unicodeName = "Service-A: Café ☕️";
         ItemDto itemDto = new ItemDto(unicodeName, 2, 9.99, "Unicode name");
 
         String response = mockMvc.perform(post("/api/inventory")
@@ -233,7 +233,7 @@ public class ItemControllerIntegrationTest {
 
     @Test
     public void testGetItemByIdAndName_CaseMismatch_NotFound() throws Exception {
-        ItemDto itemDto = new ItemDto("CaseSensitive", 1, 1.0, "case test");
+        ItemDto itemDto = new ItemDto("Service-A: CaseSensitive", 1, 1.0, "case test");
 
         String response = mockMvc.perform(post("/api/inventory")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -242,15 +242,14 @@ public class ItemControllerIntegrationTest {
 
         Item createdItem = objectMapper.readValue(response, Item.class);
         String wrongCase = createdItem.getName().toLowerCase();
-        String encodedWrongCase = java.net.URLEncoder.encode(wrongCase, java.nio.charset.StandardCharsets.UTF_8);
 
-        mockMvc.perform(get("/api/inventory/" + createdItem.getId() + "/itemname/" + encodedWrongCase))
+        mockMvc.perform(get("/api/inventory/" + createdItem.getId() + "/itemname/" + wrongCase))
             .andExpect(status().isNotFound());
     }
 
     @Test
     public void testGetItemByIdAndName_LeadingTrailingSpaces_NotFound() throws Exception {
-        ItemDto itemDto = new ItemDto("TrimTest", 4, 44.0, "trim test");
+        ItemDto itemDto = new ItemDto("Service-A: TrimTest", 4, 44.0, "trim test");
 
         String response = mockMvc.perform(post("/api/inventory")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -259,9 +258,8 @@ public class ItemControllerIntegrationTest {
 
         Item createdItem = objectMapper.readValue(response, Item.class);
         String withSpaces = " " + createdItem.getName() + " ";
-        String encoded = java.net.URLEncoder.encode(withSpaces, java.nio.charset.StandardCharsets.UTF_8);
 
-        mockMvc.perform(get("/api/inventory/" + createdItem.getId() + "/itemname/" + encoded))
+        mockMvc.perform(get("/api/inventory/" + createdItem.getId() + "/itemname/" + withSpaces))
             .andExpect(status().isNotFound());
     }
 
@@ -292,7 +290,7 @@ public class ItemControllerIntegrationTest {
 
     @Test
     public void testGetItemByIdAndName_VeryLongName_Success() throws Exception {
-        String longName = "A".repeat(255);
+        String longName = "Service-A: " + "A".repeat(241);
         ItemDto itemDto = new ItemDto(longName, 8, 88.0, "long name");
 
         String response = mockMvc.perform(post("/api/inventory")
@@ -301,9 +299,8 @@ public class ItemControllerIntegrationTest {
             .andReturn().getResponse().getContentAsString();
 
         Item createdItem = objectMapper.readValue(response, Item.class);
-        String encoded = java.net.URLEncoder.encode(longName, java.nio.charset.StandardCharsets.UTF_8);
 
-        mockMvc.perform(get("/api/inventory/" + createdItem.getId() + "/itemname/" + encoded))
+        mockMvc.perform(get("/api/inventory/" + createdItem.getId() + "/itemname/" + longName))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.name", is(longName)));
     }
@@ -311,7 +308,7 @@ public class ItemControllerIntegrationTest {
     @Test
     public void testUpdateItemByIdAndName_Success_UpdatesAndPersists() throws Exception {
         // Arrange: create an item
-        ItemDto original = new ItemDto("OriginalCtrl", 5, 50.0, "orig desc");
+        ItemDto original = new ItemDto("Service-A: OriginalCtrl", 5, 50.0, "orig desc");
         String createdJson = mockMvc.perform(post("/api/inventory")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(original)))
@@ -319,13 +316,13 @@ public class ItemControllerIntegrationTest {
         Item created = objectMapper.readValue(createdJson, Item.class);
 
         // Act: update via controller using id+name (also change the name)
-        ItemDto update = new ItemDto("RenamedCtrl", 7, 77.7, "updated");
+        ItemDto update = new ItemDto("Service-A: RenamedCtrl", 7, 77.7, "updated");
         mockMvc.perform(put("/api/inventory/{id}/itemname/{name}", created.getId(), created.getName())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(update)))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.id", is(created.getId())))
-            .andExpect(jsonPath("$.name", is("RenamedCtrl")))
+            .andExpect(jsonPath("$.name", is("Service-A: RenamedCtrl")))
             .andExpect(jsonPath("$.stock", is(7)))
             .andExpect(jsonPath("$.price", is(77.7)))
             .andExpect(jsonPath("$.description", is("updated")));
@@ -333,15 +330,15 @@ public class ItemControllerIntegrationTest {
         // Assert persistence by fetching by id
         mockMvc.perform(get("/api/inventory/{id}", created.getId()))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.name", is("RenamedCtrl")))
+            .andExpect(jsonPath("$.name", is("Service-A: RenamedCtrl")))
             .andExpect(jsonPath("$.stock", is(7)))
             .andExpect(jsonPath("$.price", is(77.7)))
             .andExpect(jsonPath("$.description", is("updated")));
 
         // Old name should no longer match, new name should match
-        mockMvc.perform(get("/api/inventory/{id}/itemname/{name}", created.getId(), "OriginalCtrl"))
+        mockMvc.perform(get("/api/inventory/{id}/itemname/{name}", created.getId(), "Service-A: OriginalCtrl"))
             .andExpect(status().isNotFound());
-        mockMvc.perform(get("/api/inventory/{id}/itemname/{name}", created.getId(), "RenamedCtrl"))
+        mockMvc.perform(get("/api/inventory/{id}/itemname/{name}", created.getId(), "Service-A: RenamedCtrl"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.id", is(created.getId())));
     }
@@ -372,7 +369,7 @@ public class ItemControllerIntegrationTest {
         // Ensure original item unchanged
         mockMvc.perform(get("/api/inventory/{id}", created.getId()))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.name", is("RealCtrl")))
+            .andExpect(jsonPath("$.name", is("Service-A: RealCtrl")))
             .andExpect(jsonPath("$.stock", is(2)))
             .andExpect(jsonPath("$.price", is(2.0)))
             .andExpect(jsonPath("$.description", is("r")));
@@ -401,7 +398,7 @@ public class ItemControllerIntegrationTest {
         // Verify DB unchanged
         mockMvc.perform(get("/api/inventory/{id}", created.getId()))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.name", is("KeepCtrl")))
+            .andExpect(jsonPath("$.name", is("Service-A: KeepCtrl")))
             .andExpect(jsonPath("$.stock", is(3)))
             .andExpect(jsonPath("$.price", is(30.0)))
             .andExpect(jsonPath("$.description", is("k")));

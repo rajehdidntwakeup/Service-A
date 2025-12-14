@@ -40,7 +40,7 @@ public class ItemServiceUnitTest {
     Item result = itemService.createItem(dto);
 
     assertNotNull(result);
-    assertEquals("Name", result.getName());
+    assertEquals("Service-A: Name", result.getName());
     assertEquals(2, result.getStock());
     assertEquals(15.5, result.getPrice());
     verify(itemRepository, times(1)).save(any(Item.class));
@@ -92,15 +92,15 @@ public class ItemServiceUnitTest {
 
   @Test
   void updateItemById_updatesFieldsWhenPresent() {
-    Item existing = new Item("Old", 1, 10.0, "old");
+    Item existing = new Item("Service-A: Old", 1, 10.0, "old");
     when(itemRepository.findById(10)).thenReturn(Optional.of(existing));
     when(itemRepository.save(any(Item.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-    ItemDto update = new ItemDto("New", 3, 30.0, "new desc");
+    ItemDto update = new ItemDto("Service-A: New", 3, 30.0, "new desc");
     Item result = itemService.updateItemById(10, update);
 
     assertNotNull(result);
-    assertEquals("New", result.getName());
+    assertEquals("Service-A: New", result.getName());
     assertEquals(3, result.getStock());
     assertEquals(30.0, result.getPrice());
     assertEquals("new desc", result.getDescription());
@@ -331,7 +331,7 @@ public class ItemServiceUnitTest {
 
     assertNotNull(result);
     assertSame(existing, result);
-    assertEquals("NewName", result.getName());
+    assertEquals("Service-A: NewName", result.getName());
     assertEquals(9, result.getStock());
     assertEquals(99.99, result.getPrice());
     assertEquals("new desc", result.getDescription());
@@ -401,12 +401,12 @@ public class ItemServiceUnitTest {
     when(itemRepository.findItemByIdAndName(id, null)).thenReturn(existing);
     when(itemRepository.save(any(Item.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-    ItemDto update = new ItemDto("Updated", 4, 4.4, "u");
+    ItemDto update = new ItemDto("Service-A: Updated", 4, 4.4, "u");
 
     Item result = itemService.updateItemByIdAndName(id, null, update);
 
     assertNotNull(result);
-    assertEquals("Updated", result.getName());
+    assertEquals("Service-A: Updated", result.getName());
     assertEquals(4, result.getStock());
     assertEquals(4.4, result.getPrice());
     assertEquals("u", result.getDescription());
@@ -417,17 +417,17 @@ public class ItemServiceUnitTest {
   @Test
   void updateItemByIdAndName_negativeId_found_updatesAndSaves() {
     int id = -7;
-    String name = "Neg";
+    String name = "Service-A: Neg";
     Item existing = new Item(name, 10, 10.0, "old");
     when(itemRepository.findItemByIdAndName(id, name)).thenReturn(existing);
     when(itemRepository.save(any(Item.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-    ItemDto update = new ItemDto("NegUpdated", 11, 11.11, "new");
+    ItemDto update = new ItemDto("Service-A: NegUpdated", 11, 11.11, "new");
 
     Item result = itemService.updateItemByIdAndName(id, name, update);
 
     assertNotNull(result);
-    assertEquals("NegUpdated", result.getName());
+    assertEquals("Service-A: NegUpdated", result.getName());
     assertEquals(11, result.getStock());
     assertEquals(11.11, result.getPrice());
     assertEquals("new", result.getDescription());

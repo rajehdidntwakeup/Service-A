@@ -67,8 +67,8 @@ public class MultiCatalogServiceIntegrationTest {
 
         // Assert
         assertEquals(2, items.size());
-        assertTrue(items.stream().anyMatch(i -> i.getName().equals("Local A")));
-        assertTrue(items.stream().anyMatch(i -> i.getName().equals("Local B")));
+        assertTrue(items.stream().anyMatch(i -> i.getName().equals("Service-A: Local A")));
+        assertTrue(items.stream().anyMatch(i -> i.getName().equals("Service-A: Local B")));
     }
 
     @Test
@@ -81,12 +81,12 @@ public class MultiCatalogServiceIntegrationTest {
         String inventoryCUrl = "http://localhost:8083/api/inventory";
         String externalBJson = """
             [
-              {"name":"ExtB-1","stock":3,"price":11.0,"description":"B1"},
-              {"name":"ExtB-2","stock":6,"price":12.5,"description":"B2"}
+              {"name":"Service-B: ExtB-1","stock":3,"price":11.0,"description":"B1"},
+              {"name":"Service-B: ExtB-2","stock":6,"price":12.5,"description":"B2"}
             ]""";
         String externalCJson = """
             [
-              {"name":"ExtC-1","stock":7,"price":21.0,"description":"C1"}
+              {"name":"Service-C: ExtC-1","stock":7,"price":21.0,"description":"C1"}
             ]""";
 
         mockServer.expect(ExpectedCount.once(), requestTo(inventoryBUrl))
@@ -99,16 +99,16 @@ public class MultiCatalogServiceIntegrationTest {
 
         // Assert: 1 local + 2 (B) + 1 (C) = 4
         assertEquals(4, items.size());
-        assertTrue(items.stream().anyMatch(i -> i.getName().equals("Local A")));
-        assertTrue(items.stream().anyMatch(i -> i.getName().equals("ExtB-1")));
-        assertTrue(items.stream().anyMatch(i -> i.getName().equals("ExtB-2")));
-        assertTrue(items.stream().anyMatch(i -> i.getName().equals("ExtC-1")));
+        assertTrue(items.stream().anyMatch(i -> i.getName().equals("Service-A: Local A")));
+        assertTrue(items.stream().anyMatch(i -> i.getName().equals("Service-B: ExtB-1")));
+        assertTrue(items.stream().anyMatch(i -> i.getName().equals("Service-B: ExtB-2")));
+        assertTrue(items.stream().anyMatch(i -> i.getName().equals("Service-C: ExtC-1")));
     }
 
     @Test
     void getAllItems_withMultiCatalog_handlesOneExternalFailure() {
         // Arrange local
-        itemService.createItem(new test.servicea.domain.dto.ItemDto("Local X", 1, 1.0, "LX"));
+        itemService.createItem(new test.servicea.domain.dto.ItemDto("Service-A: Local X", 1, 1.0, "LX"));
 
         String inventoryBUrl = "http://localhost:8082/api/inventory";
         String inventoryCUrl = "http://localhost:8083/api/inventory";
@@ -126,7 +126,7 @@ public class MultiCatalogServiceIntegrationTest {
 
         // Assert: should include local and the successful external items; failure is swallowed
         assertEquals(2, items.size());
-        assertTrue(items.stream().anyMatch(i -> i.getName().equals("Local X")));
+        assertTrue(items.stream().anyMatch(i -> i.getName().equals("Service-A: Local X")));
         assertTrue(items.stream().anyMatch(i -> i.getName().equals("ExtC-only")));
     }
 

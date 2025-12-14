@@ -26,11 +26,12 @@ import test.servicea.service.converter.ConversionProperties;
 public class ItemServiceImpl implements ItemService {
 
   private static final Logger LOG = LoggerFactory.getLogger(ItemServiceImpl.class);
+  private static final String SERVICE_NAME = "Service-A";
 
   private final ItemRepository itemRepository;
   private final ConversionProperties properties;
   private final RestTemplate restTemplate;
-  
+
 
 
   /**
@@ -52,8 +53,9 @@ public class ItemServiceImpl implements ItemService {
     if (itemDto == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Item cannot be null");
     }
+    String name = validateItemName(itemDto.getName());
     Item item =
-        new Item(itemDto.getName(), itemDto.getStock(), itemDto.getPrice(), itemDto.getDescription());
+        new Item(name, itemDto.getStock(), itemDto.getPrice(), itemDto.getDescription());
     itemRepository.save(item);
     return item;
   }
@@ -82,12 +84,7 @@ public class ItemServiceImpl implements ItemService {
     Optional<Item> item = itemRepository.findById(id);
     if (item.isPresent()) {
       Item itemToUpdate = item.get();
-      itemToUpdate.setName(itemDto.getName());
-      itemToUpdate.setStock(itemDto.getStock());
-      itemToUpdate.setPrice(itemDto.getPrice());
-      itemToUpdate.setDescription(itemDto.getDescription());
-      itemRepository.save(itemToUpdate);
-      return itemToUpdate;
+      return getItem(itemDto, itemToUpdate);
     }
     return null;
   }
@@ -101,14 +98,28 @@ public class ItemServiceImpl implements ItemService {
   public Item updateItemByIdAndName(int id, String name, ItemDto itemDto) {
     Item item = getItemByIdAndName(id, name);
     if (item != null) {
-      item.setName(itemDto.getName());
-      item.setStock(itemDto.getStock());
-      item.setPrice(itemDto.getPrice());
-      item.setDescription(itemDto.getDescription());
-      itemRepository.save(item);
-      return item;
+      return getItem(itemDto, item);
     }
     return null;
+  }
+
+
+  /**
+   * Updates the properties of an existing item based on the provided ItemDto
+   * and persists the updated item in the repository.
+   *
+   * @param itemDto the data transfer object containing the new item properties
+   * @param item    the existing item to be updated
+   * @return the updated item after persisting changes
+   */
+  private Item getItem(ItemDto itemDto, Item item) {
+    String validatedName = validateItemName(itemDto.getName());
+    item.setName(validatedName);
+    item.setStock(itemDto.getStock());
+    item.setPrice(itemDto.getPrice());
+    item.setDescription(itemDto.getDescription());
+    itemRepository.save(item);
+    return item;
   }
 
 
@@ -139,5 +150,19 @@ public class ItemServiceImpl implements ItemService {
       }
     }
     return externalItems;
+  }
+
+  /**
+   * Validates the given item name by ensuring it contains the service name.
+   * If the service name is not present, it prefixes the name with the service name.
+   *
+   * @param name the name of the item to validate
+   * @return the validated item name, prefixed with the service name if necessary
+   */
+  private String validateItemName(String name) {
+    if (!name.contains(SERVICE_NAME)) {
+      return SERVICE_NAME + ": " + name;
+    }
+    return name;
   }
 }
