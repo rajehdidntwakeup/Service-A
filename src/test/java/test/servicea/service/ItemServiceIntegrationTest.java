@@ -26,7 +26,7 @@ public class ItemServiceIntegrationTest {
         Item createdItem = itemService.createItem(itemDto);
 
         assertNotNull(createdItem);
-        assertEquals("Test Item", createdItem.getName());
+        assertEquals("Service-A: Test Item", createdItem.getName());
         assertEquals(10, createdItem.getStock());
         assertEquals(100.0, createdItem.getPrice());
         assertEquals("Test Description", createdItem.getDescription());
@@ -57,14 +57,14 @@ public class ItemServiceIntegrationTest {
 
     @Test
     public void testUpdateItemById() {
-        ItemDto itemDto = new ItemDto("Old Item", 5, 50.0, "Old Description");
+        ItemDto itemDto = new ItemDto("Service-A: Old Item", 5, 50.0, "Old Description");
         Item createdItem = itemService.createItem(itemDto);
 
-        ItemDto updatedDto = new ItemDto("Updated Item", 20, 200.0, "Updated Description");
+        ItemDto updatedDto = new ItemDto("Service-A: Updated Item", 20, 200.0, "Updated Description");
         Item updatedItem = itemService.updateItemById(createdItem.getId(), updatedDto);
 
         assertNotNull(updatedItem);
-        assertEquals("Updated Item", updatedItem.getName());
+        assertEquals("Service-A: Updated Item", updatedItem.getName());
         assertEquals(20, updatedItem.getStock());
         assertEquals(200.0, updatedItem.getPrice());
         assertEquals("Updated Description", updatedItem.getDescription());
@@ -91,14 +91,14 @@ public class ItemServiceIntegrationTest {
 
     @Test
     public void testGetItemByIdAndName_Found() {
-        ItemDto itemDto = new ItemDto("Special Item", 7, 77.7, "Special Desc");
+        ItemDto itemDto = new ItemDto("Service-A: Special Item", 7, 77.7, "Special Desc");
         Item createdItem = itemService.createItem(itemDto);
 
-        Item fetched = itemService.getItemByIdAndName(createdItem.getId(), "Special Item");
+        Item fetched = itemService.getItemByIdAndName(createdItem.getId(), "Service-A: Special Item");
 
         assertNotNull(fetched);
         assertEquals(createdItem.getId(), fetched.getId());
-        assertEquals("Special Item", fetched.getName());
+        assertEquals("Service-A: Special Item", fetched.getName());
         assertEquals(7, fetched.getStock());
         assertEquals(77.7, fetched.getPrice());
         assertEquals("Special Desc", fetched.getDescription());
@@ -162,17 +162,17 @@ public class ItemServiceIntegrationTest {
         ItemDto itemDto = new ItemDto("Case Name", 1, 10.0, "D");
         Item created = itemService.createItem(itemDto);
 
-        Item fetchedMismatch = itemService.getItemByIdAndName(created.getId(), "case name");
+        Item fetchedMismatch = itemService.getItemByIdAndName(created.getId(), "Service-A: case name");
         assertNull(fetchedMismatch);
 
-        Item fetchedExact = itemService.getItemByIdAndName(created.getId(), "Case Name");
+        Item fetchedExact = itemService.getItemByIdAndName(created.getId(), "Service-A: Case Name");
         assertNotNull(fetchedExact);
         assertEquals(created.getId(), fetchedExact.getId());
     }
 
     @Test
     public void testGetItemByIdAndName_SpecialCharactersAndUnicode() {
-        String special = "Café ☕ #1";
+        String special = "Service-A: Café ☕ #1";
         ItemDto itemDto = new ItemDto(special, 2, 12.5, "Unicode");
         Item created = itemService.createItem(itemDto);
 
@@ -196,18 +196,18 @@ public class ItemServiceIntegrationTest {
     @Test
     public void testUpdateItemByIdAndName_Found_UpdatesAndPersists() {
         // Arrange: create an item
-        ItemDto original = new ItemDto("Original", 5, 50.0, "orig desc");
+        ItemDto original = new ItemDto("Service-A: Original", 5, 50.0, "orig desc");
         Item created = itemService.createItem(original);
         int id = created.getId();
         String originalName = created.getName();
 
         // Act: update by id and original name (also change the name)
-        ItemDto update = new ItemDto("Renamed", 7, 77.7, "updated");
+        ItemDto update = new ItemDto("Service-A: Renamed", 7, 77.7, "updated");
         Item updated = itemService.updateItemByIdAndName(id, originalName, update);
 
         // Assert: returned object has new values
         assertNotNull(updated);
-        assertEquals("Renamed", updated.getName());
+        assertEquals("Service-A: Renamed", updated.getName());
         assertEquals(7, updated.getStock());
         assertEquals(77.7, updated.getPrice());
         assertEquals("updated", updated.getDescription());
@@ -215,14 +215,14 @@ public class ItemServiceIntegrationTest {
         // And it was persisted: fetch by id
         Item byId = itemService.getItemById(id);
         assertNotNull(byId);
-        assertEquals("Renamed", byId.getName());
+        assertEquals("Service-A: Renamed", byId.getName());
         assertEquals(7, byId.getStock());
         assertEquals(77.7, byId.getPrice());
         assertEquals("updated", byId.getDescription());
 
         // Old name no longer matches, new name does
         assertNull(itemService.getItemByIdAndName(id, originalName));
-        Item byNewName = itemService.getItemByIdAndName(id, "Renamed");
+        Item byNewName = itemService.getItemByIdAndName(id, "Service-A: Renamed");
         assertNotNull(byNewName);
         assertEquals(id, byNewName.getId());
     }
@@ -235,7 +235,7 @@ public class ItemServiceIntegrationTest {
         assertNull(result);
 
         // Also verify with a partially existing case: create an item and use wrong name
-        ItemDto dto = new ItemDto("Real", 2, 2.0, "r");
+        ItemDto dto = new ItemDto("Service-A: Real", 2, 2.0, "r");
         Item created = itemService.createItem(dto);
         Item resultWrongName = itemService.updateItemByIdAndName(created.getId(), "Wrong", update);
         assertNull(resultWrongName);
@@ -243,7 +243,7 @@ public class ItemServiceIntegrationTest {
         // Ensure original item unchanged
         Item still = itemService.getItemById(created.getId());
         assertNotNull(still);
-        assertEquals("Real", still.getName());
+        assertEquals("Service-A: Real", still.getName());
         assertEquals(2, still.getStock());
         assertEquals(2.0, still.getPrice());
         assertEquals("r", still.getDescription());
@@ -263,7 +263,7 @@ public class ItemServiceIntegrationTest {
         // Verify unchanged in DB
         Item after = itemService.getItemById(id);
         assertNotNull(after);
-        assertEquals("Keep", after.getName());
+        assertEquals("Service-A: Keep", after.getName());
         assertEquals(3, after.getStock());
         assertEquals(30.0, after.getPrice());
         assertEquals("k", after.getDescription());
