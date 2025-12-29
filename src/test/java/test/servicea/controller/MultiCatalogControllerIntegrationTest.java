@@ -55,14 +55,14 @@ public class MultiCatalogControllerIntegrationTest {
     // Fetch all without multi-catalog (defaults to false)
     mockMvc.perform(get("/api/inventory"))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$[*].name", hasItems("Local A", "Local B")));
+        .andExpect(jsonPath("$[*].name", hasItems("Service-A: Local A", "Service-A: Local B")));
   }
 
   @Test
   @DisplayName("getAll with multi-catalog=true succeeds even if external services fail, returning local items")
   void getAll_multiCatalog_true_handlesExternalFailures() throws Exception {
     // Create one local item
-    ItemDto local = new ItemDto("Local Only", 5, 5.55, "Local desc");
+    ItemDto local = new ItemDto("Service-A: Local Only", 5, 5.55, "Local desc");
     mockMvc.perform(post("/api/inventory")
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(local)))
@@ -73,7 +73,7 @@ public class MultiCatalogControllerIntegrationTest {
     mockMvc.perform(get("/api/inventory").param("multi-catalog", "true"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$", not(empty())))
-        .andExpect(jsonPath("$[*].name", hasItem("Local Only")));
+        .andExpect(jsonPath("$[*].name", hasItem("Service-A: Local Only")));
   }
 
   @Test
@@ -87,14 +87,14 @@ public class MultiCatalogControllerIntegrationTest {
 
     String defaultResp = mockMvc.perform(get("/api/inventory"))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$[*].name", hasItem("ExplicitFalse_Item")))
+        .andExpect(jsonPath("$[*].name", hasItem("Service-A: ExplicitFalse_Item")))
         .andReturn()
         .getResponse()
         .getContentAsString();
 
     String explicitFalseResp = mockMvc.perform(get("/api/inventory").param("multi-catalog", "false"))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$[*].name", hasItem("ExplicitFalse_Item")))
+        .andExpect(jsonPath("$[*].name", hasItem("Service-A: ExplicitFalse_Item")))
         .andReturn()
         .getResponse()
         .getContentAsString();
@@ -147,6 +147,6 @@ public class MultiCatalogControllerIntegrationTest {
 
     mockMvc.perform(get("/api/inventory").param("multi-catalog", "TRUE"))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$[*].name", hasItem("UpperTrue_Item")));
+        .andExpect(jsonPath("$[*].name", hasItem("Service-A: UpperTrue_Item")));
   }
 }
