@@ -26,7 +26,7 @@ import test.servicea.service.converter.ConversionProperties;
 public class ItemServiceImpl implements ItemService {
 
   private static final Logger LOG = LoggerFactory.getLogger(ItemServiceImpl.class);
-  private static final String SERVICE_NAME = "Service-A";
+  private static final String SERVICE_NAME = "Inventory-A";
 
   private final ItemRepository itemRepository;
   private final ConversionProperties properties;
