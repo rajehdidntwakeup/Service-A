@@ -1,5 +1,25 @@
 # Changelog
 
+## [1.1.1](https://github.com/rajehdidntwakeup/Service-A/compare/v1.1.0...v1.1.1) (2025-12-30)
+
+
+### Miscellaneous Chores
+
+* add Kubernetes manifests for group-a inventory application ([73d4b98](https://github.com/rajehdidntwakeup/Service-A/commit/73d4b986e983a7c77dcf9065361a38d9112b282d))
+* add Kubernetes manifests for group-a inventory application ([cc1c0ef](https://github.com/rajehdidntwakeup/Service-A/commit/cc1c0efbe8f2f7d582d270e69e94b22c77dd7d6e))
+* add Kubernetes manifests for group-a inventory application ([#88](https://github.com/rajehdidntwakeup/Service-A/issues/88)) ([096e68b](https://github.com/rajehdidntwakeup/Service-A/commit/096e68b0d75cd4d3a9cde94244e921fdf26cf60e))
+* add workflow_dispatch trigger to verification workflow ([#78](https://github.com/rajehdidntwakeup/Service-A/issues/78)) ([73bbb3a](https://github.com/rajehdidntwakeup/Service-A/commit/73bbb3a793769a5c9cda44eb18f98d339ed5f9b3))
+* remove unnecessary newline from verify workflow ([f370e1b](https://github.com/rajehdidntwakeup/Service-A/commit/f370e1bd798856c44d8b2602ab38bf0037804a5f))
+* remove unnecessary newline from verify workflow ([#80](https://github.com/rajehdidntwakeup/Service-A/issues/80)) ([77225fd](https://github.com/rajehdidntwakeup/Service-A/commit/77225fd2b2181bffa40518f481740f0bd170dfed))
+* replace hardcoded external inventory properties with environment variables in application.properties ([c3522ad](https://github.com/rajehdidntwakeup/Service-A/commit/c3522ad8e9379f44a5b57fe78e99946a9789daa9))
+* **service:** prefix item names with service name for consistent identification ([#93](https://github.com/rajehdidntwakeup/Service-A/issues/93)) ([d846e58](https://github.com/rajehdidntwakeup/Service-A/commit/d846e587d1ab638a7a8d4f9956fa391dc9241ed4))
+* **service:** update service name constant for Inventory-A alignment ([d392157](https://github.com/rajehdidntwakeup/Service-A/commit/d392157ad8bf39f3e95685b752e5e8ef8b80cb21))
+* update verify workflow to trigger on pull request events ([35ea4cd](https://github.com/rajehdidntwakeup/Service-A/commit/35ea4cd6ff922fd3291504680b171ec4a2f787c9))
+* update verify workflow to trigger on pull request events ([6a9eab4](https://github.com/rajehdidntwakeup/Service-A/commit/6a9eab4c6ae80fb0e4258384de269a325f4935b6))
+* update verify workflow to trigger on pull request events ([02e9efc](https://github.com/rajehdidntwakeup/Service-A/commit/02e9efc417996db6eb450a952573845e023a6c49))
+* update verify workflow trigger to run on push to main ([#79](https://github.com/rajehdidntwakeup/Service-A/issues/79)) ([680f32f](https://github.com/rajehdidntwakeup/Service-A/commit/680f32f5d5e525b66caa01f4174fd739326041ce))
+* update workflow to use pull_request_target for main branch verification ([#76](https://github.com/rajehdidntwakeup/Service-A/issues/76)) ([8bf2443](https://github.com/rajehdidntwakeup/Service-A/commit/8bf244335a69ce24b447e903cdbf65931a9f62d0))
+
 ## [1.1.0](https://github.com/rajehdidntwakeup/Service-A/compare/v1.0.0...v1.1.0) (2025-11-21)
 
 
